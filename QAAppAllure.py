@@ -110,7 +110,7 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV1", "market_code": "AT/de", "model_code": "C236"},
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "C236"},
     
     
 ]

@@ -14,13 +14,22 @@ def verify_personalization_and_capture(
     Verifies the personalized image and captures XHR responses and screenshots.
     """
     try:
+        # --- Definir substrings de campañas antes de usarlos ---
+        CAMPAIGN_SUBSTRINGS = {
+            "BFV1": "best-fitting-vehicle",
+            "BFV2": "best-fitting-vehicle",
+            "BFV3": "best-fitting-vehicle",
+            # agrega más si es necesario
+        }
+        substring = CAMPAIGN_SUBSTRINGS.get(test_name, test_name)
+
         # Check userGroup in XHR responses
         with allure.step("🔍 Checking userGroup in XHR responses..."):
             try:
                 logging.info(f"ℹ️ Setting campaign name substring to: {test_name}")
                 xhr_capturer.set_campaign_name_substring(test_name)
                 logging.info("✅ Campaign name substring set successfully.")
-                
+
                 xhr_data = xhr_capturer.get_captured_data()
                 if xhr_data:
                     import json
@@ -29,9 +38,13 @@ def verify_personalization_and_capture(
                     allure.attach("No XHR data captured.", name="XHR Responses", attachment_type=allure.attachment_type.TEXT)
                     logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
 
-                for response in xhr_data:
+                for response in xhr_data or []:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
-                    for campaign in campaigns:
+                    filtered_campaigns = [
+                        campaign for campaign in campaigns
+                        if substring.lower() in campaign.get("campaignName", "").lower()
+                    ]
+                    for campaign in filtered_campaigns:
                         campaign_name = campaign.get("campaignName", "Unknown Campaign")
                         user_group = campaign.get("userGroup", "Unknown UserGroup")
                         experience_name = campaign.get("experienceName", "Unknown Experience")
@@ -64,11 +77,6 @@ def verify_personalization_and_capture(
                         element_to_scroll.scroll_into_view_if_needed()
                         logging.info(f"✅ Scrolled to element: {selector}")
 
-                verifier = ImageVerifier(page)
-                found = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src, test_name)
-                if not found:
-                    raise Exception(f"No matching image found with expected src: {expected_src} in the first two images.")
-
                 # Capture screenshot
                 logging.info("📸 Taking screenshot...")
                 screenshot_path = os.path.join(screenshot_dir, f"{test_name}_attempt_{attempt}.png")
@@ -78,6 +86,13 @@ def verify_personalization_and_capture(
                     logging.info(f"✅ Screenshot saved and attached at: {screenshot_path}")
                 except Exception as e:
                     logging.error(f"❌ Failed to capture or attach screenshot: {e}")
+                    
+                verifier = ImageVerifier(page)
+                found = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src, test_name)
+                if not found:
+                    raise Exception(f"No matching image found with expected src: {expected_src} in the first two images.")
+
+                
                 test_success = True
 
             except Exception as e:
