@@ -169,7 +169,7 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-        headless=True,  # or False for headed
+        headless=False,  # or False for headed
         args=[
             "--start-maximized",
             "--disable-gpu",
@@ -178,6 +178,10 @@ def test_run(test_case, screenshot_dir):
             "--disable-dev-shm-usage",
             "--no-sandbox",
             "--window-size=1920,1080",
+            "--disable-blink-features=AutomationControlled",
+            "--disable-infobars",
+            "--disable-extensions",
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
            
         ]
         )
