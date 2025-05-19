@@ -1,0 +1,7 @@
+playwright
+pytest
+allure-pytest
+requests
+pytest-asyncio
+asyncio
+```
