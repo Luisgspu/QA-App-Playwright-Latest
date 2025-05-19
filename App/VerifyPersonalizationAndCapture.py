@@ -31,12 +31,7 @@ def verify_personalization_and_capture(
 
                 for response in xhr_data:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
-                    # Filtra campañas por el substring
-                    filtered_campaigns = [
-                        campaign for campaign in campaigns
-                        if test_name.lower() in campaign.get("campaignName", "").lower()
-                    ]
-                    for campaign in filtered_campaigns:
+                    for campaign in campaigns:
                         campaign_name = campaign.get("campaignName", "Unknown Campaign")
                         user_group = campaign.get("userGroup", "Unknown UserGroup")
                         experience_name = campaign.get("experienceName", "Unknown Experience")
