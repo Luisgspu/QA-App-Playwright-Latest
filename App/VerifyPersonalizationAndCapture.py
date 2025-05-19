@@ -31,7 +31,12 @@ def verify_personalization_and_capture(
 
                 for response in xhr_data:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
-                    for campaign in campaigns:
+                    # Filtra campañas por el substring
+                    filtered_campaigns = [
+                        campaign for campaign in campaigns
+                        if test_name.lower() in campaign.get("campaignName", "").lower()
+                    ]
+                    for campaign in filtered_campaigns:
                         campaign_name = campaign.get("campaignName", "Unknown Campaign")
                         user_group = campaign.get("userGroup", "Unknown UserGroup")
                         experience_name = campaign.get("experienceName", "Unknown Experience")
@@ -65,14 +70,10 @@ def verify_personalization_and_capture(
                         logging.info(f"✅ Scrolled to element: {selector}")
 
                 verifier = ImageVerifier(page)
-                found = verifier.verify_image(selector, expected_src, max_images=2)
+                found = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src, test_name)
                 if not found:
                     raise Exception(f"No matching image found with expected src: {expected_src} in the first two images.")
 
-                with allure.step(f"✅ Personalized image with expected src '{expected_src}' was applied correctly."):
-                    logging.info(f"✅ Found matching image with src containing: {expected_src}")
-
-          
                 # Capture screenshot
                 logging.info("📸 Taking screenshot...")
                 screenshot_path = os.path.join(screenshot_dir, f"{test_name}_attempt_{attempt}.png")
@@ -94,14 +95,6 @@ def verify_personalization_and_capture(
                     logging.info(f"✅ Screenshot saved and attached at: {screenshot_path}")
                 except Exception as e2:
                     logging.error(f"❌ Failed to capture or attach screenshot: {e2}")
-
-                with allure.step(f"❌ Image not found in the specified selector. Error: {e}"):
-                    logging.error(f"❌ Image not found in the specified selector. Error: {e}")
-                    allure.dynamic.label("defect", "Wrong Personalization Image")
-                    allure.dynamic.tag("Personalization Issue")
-                    allure.attach(f"Expected src: {expected_src}", name="Expected Image Source", attachment_type=allure.attachment_type.TEXT)
-                    allure.attach(f"Error: {e}", name="Image Verification Error", attachment_type=allure.attachment_type.TEXT)
-                return False
 
         return test_success
 

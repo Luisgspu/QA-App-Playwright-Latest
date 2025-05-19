@@ -110,7 +110,7 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV1", "market_code": "AT/de", "model_code": "A236"},
+    {"test_name": "BFV1", "market_code": "AT/de", "model_code": "C236"},
     
     
 ]
@@ -169,8 +169,8 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-        headless=False,  # or False for headed
-        args=[
+            headless=True,  # or False for headed
+            args=[
             "--start-maximized",
             "--disable-gpu",
             "--enable-webgl",
@@ -181,10 +181,11 @@ def test_run(test_case, screenshot_dir):
             "--disable-blink-features=AutomationControlled",
             "--disable-infobars",
             "--disable-extensions",
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-           
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "--disable-features=IsolateOrigins,site-per-process",
+            "--blink-settings=imagesEnabled=true"
         ]
-        )
+    )
         context = browser.new_context(
             viewport={"width": 1920, "height": 1080},
             screen={"width": 1920, "height": 1080}

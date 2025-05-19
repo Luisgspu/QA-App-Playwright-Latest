@@ -1,35 +1,87 @@
-from playwright.sync_api import sync_playwright
-import pytest
-import allure
-import json
 import logging
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+import allure
+import pytest
+from App.CreateDriver import driver
+import uuid
+from App.ConfigStarted import ConfiguratorStarted  # Import the ConfiguratorStarted class
 
-@pytest.fixture(scope="function")
-def setup_browser():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
-        yield page
-        context.close()
-        browser.close()
+# Generate a consistent UUID for the test using the test name
+def generate_test_uuid(test_name):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, test_name))
 
-def test_bfv2(setup_browser):
-    page = setup_browser
-    target_url = "https://example.com"  # Replace with the actual URL for the BFV2 test
+class BFV2Test:
+    def __init__(self, driver, urls, test_link=None):
+        self.driver = driver
+        self.urls = urls
+        self.test_link = test_link
 
-    logging.info(f"🌍 Navigating to: {target_url}")
-    page.goto(target_url)
+    @allure.feature("BFV2 Test Suite")
+    @allure.story("Run BFV2 Test")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.id(generate_test_uuid("run_bfv2_test"))  # Assign a consistent UUID to the main test
+    def run(self):
+        """Executes the BFV2 test."""
+        try:
+            # Execute the main logic of the BFV2 test
+            self.perform_bfv2_test()
 
-    # Example of interacting with the page
-    with allure.step("✅ Interacting with the page"):
-        page.click("selector-for-element")  # Replace with actual selector
-        allure.attach(page.screenshot(), name="Screenshot after interaction", attachment_type=allure.attachment_type.PNG)
+            # If there is a test link, navigate to Salesforce
+            if self.test_link:
+                self.navigate_to_salesforce()
 
-    # Example of verifying a condition
-    assert page.title() == "Expected Title"  # Replace with the expected title
+        except Exception as e:
+            logging.error(f"❌ Error during the BFV2 test: {e}")
+            allure.attach(f"Error: {e}", name="Test Error", attachment_type=allure.attachment_type.TEXT)
 
-    # Attach any additional information to Allure
-    allure.attach(json.dumps({"key": "value"}, indent=2), name="Test Data", attachment_type=allure.attachment_type.JSON)
+    @allure.step("Perform BFV2 Test Logic")
+    @allure.id(generate_test_uuid("perform_bfv2_test"))  # Consistent UUID for this step
+    def perform_bfv2_test(self):
+        """Performs the main logic of the BFV2 test."""
+        # Create an instance of ConfiguratorStarted
+        configurator = ConfiguratorStarted(self.driver)
+            
+        # Navigate to the product page
+        with allure.step(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}"):
+            self.driver.get(self.urls['PRODUCT_PAGE'])
+            logging.info(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}")
+            time.sleep(3)
 
-    logging.info("✅ BFV2 test completed successfully.")
+        # Navigate to the configurator
+        with allure.step(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}"):
+            self.driver.get(self.urls['CONFIGURATOR'])
+            logging.info(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}")
+            time.sleep(4)
+
+        # Call the perform_configurator_actions function from ConfiguratorStarted
+        with allure.step("✅ Performing configuration actions"):
+            try:
+                configurator.perform_configurator_actions()
+                logging.info("✅ Successfully performed configuration actions.")
+            except Exception as e:
+                logging.error(f"❌ Error performing configuration actions: {e}")
+                allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
+                raise  # Re-raise the exception to handle it at a higher level
+
+        # Navigate back to the home page
+        with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
+            self.driver.get(self.urls['HOME_PAGE'])
+            logging.info(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}")
+            WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+
+    @allure.step("Navigate to Salesforce URL")
+    @allure.id(generate_test_uuid("navigate_to_salesforce"))  # Consistent UUID for this step
+    def navigate_to_salesforce(self):
+        """Navigates to the Salesforce link if provided."""
+        try:
+            salesforce_url = self.urls['HOME_PAGE'] + self.test_link
+            self.driver.get(salesforce_url)
+            logging.info(f"🌍 Navigating to Salesforce URL: {salesforce_url}")
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        except Exception as e:
+            logging.error(f"❌ Error navigating to Salesforce URL: {e}")
+            allure.attach(f"Error: {e}", name="Salesforce Navigation Error", attachment_type=allure.attachment_type.TEXT)

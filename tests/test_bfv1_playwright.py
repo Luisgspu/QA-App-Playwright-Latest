@@ -45,14 +45,14 @@ class BFV1Test:
         with allure.step(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}"):
             self.page.goto(self.urls['PRODUCT_PAGE'])
             logging.info(f"🌍 Navigated to: {self.urls['PRODUCT_PAGE']}")
-            self.page.wait_for_load_state("networkidle")
-            time.sleep(3)
+            self.page.wait_for_load_state("load")
 
         # Navigate back to the home page
         with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
             self.page.goto(self.urls['HOME_PAGE'])
+            self.page.wait_for_load_state("load")
             logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
-            self.page.wait_for_timeout(3000)
+            self.page.wait_for_timeout(2000)
 
     @allure.step("Navigate to Salesforce URL")
     def navigate_to_salesforce(self):
@@ -61,4 +61,4 @@ class BFV1Test:
         with allure.step(f"🌍 Navigating to Salesforce URL: {salesforce_url}"):
             self.page.goto(salesforce_url)
             logging.info(f"🌍 Navigated to Salesforce URL: {salesforce_url}")
-            self.page.wait_for_selector("body")
+            self.page.wait_for_load_state("load")

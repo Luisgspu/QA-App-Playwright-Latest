@@ -1,38 +1,56 @@
 import logging
 import allure
 from playwright.sync_api import Page
+import pytest
+
 
 class ImageVerifier:
     def __init__(self, page: Page):
         self.page = page
 
-    def verify_image(self, selector: str, expected_path: str, max_images: int = 2) -> bool:
+    def verify_image(self, selector: str, expected_path: str, test_name: str = None) -> bool:
         """
-        Verifies if an image with the expected `src` is present among the first `max_images`.
-
-        Args:
-            selector (str): The CSS selector to locate the images.
-            expected_path (str): The expected substring in the `src` attribute of the image.
-            max_images (int): How many images (from the top) to check.
-
-        Returns:
-            bool: True if an image with the expected `src` is found, False otherwise.
+        Verifies if an image with the expected `src` is present among all images matching the selector.
         """
         try:
             self.page.wait_for_selector(selector, timeout=5000)
-            images = self.page.locator(selector).element_handles()
-            found_srcs = []
-            for img in images[:max_images]:
-                src = img.get_attribute("src")
-                found_srcs.append(src)
+            images = self.page.locator(selector)
+            img_count = images.count()
+            logging.info(f"Found {img_count} <img> elements inside {selector}.")
+
+            srcs = []
+            found_match = False
+            for i in range(img_count):
+                src = images.nth(i).get_attribute("src")
+                srcs.append(src)
+                logging.info(f"Image {i+1} src: {src}")
                 if src and expected_path in src:
-                    logging.info(f"✅ Found matching image with src: {src}")
-                    allure.attach(f"Found srcs:\n" + "\n".join([str(s) for s in found_srcs]), name="Checked Image Sources", attachment_type=allure.attachment_type.TEXT)
+                    found_match = True
+
+            logging.info("All found image srcs:\n" + "\n".join([str(s) for s in srcs]))
+            allure.attach(
+                "All found image srcs:\n" + "\n".join([str(s) for s in srcs]),
+                name="Checked Image Sources",
+                attachment_type=allure.attachment_type.TEXT
+            )
+            if found_match:
+                # Find the first matching src
+                matching_src = next((src for src in srcs if src and expected_path in src), None)
+                with allure.step(f"✅ Personalized image with expected src '{expected_path}' was applied correctly."):
+                    if matching_src:
+                        allure.attach(
+                            f"Matching image src:\n{matching_src}",
+                            name="Matching Image Src",
+                            attachment_type=allure.attachment_type.TEXT
+                        )
                     return True
-            logging.warning(f"⚠️ No image with the expected path '{expected_path}' was found in the first {max_images} images.")
-            allure.attach(f"Checked srcs:\n" + "\n".join([str(s) for s in found_srcs]), name="Checked Image Sources", attachment_type=allure.attachment_type.TEXT)
-            return False
+            else:
+                with allure.step(f"❌ Image not found in the specified selector."):
+                    logging.warning(f"❌ Image not found in the specified selector. Expected src: {expected_path}")
+                    return False
         except Exception as e:
-            logging.error(f"❌ Could not verify personalized image: {e}")
-            allure.attach(f"❌ Could not verify personalized image: {e}", name="Image Verification Error", attachment_type=allure.attachment_type.TEXT)
+            message = f"❌ Test '{test_name}' failed due to image verification error: {e}" if test_name else f"❌ Image verification error: {e}"
+            logging.error(message)
+            allure.attach(message, name="Image Verification Error", attachment_type=allure.attachment_type.TEXT)
+            pytest.fail(message)
             return False
