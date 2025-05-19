@@ -1,5 +1,6 @@
 import logging
 import allure
+import pytest
 from playwright.sync_api import Page
 
 class CookieHandler:
@@ -11,21 +12,27 @@ class CookieHandler:
     @allure.step("Accept cookies if the cookie banner is present")
     def accept_cookies(self):
         """Handles the cookie banner and accepts cookies if present."""
+        shadow_host_selector = "cmm-cookie-banner"
         try:
-            self.page.wait_for_selector("cmm-cookie-banner", timeout=10000)
-            logging.info("✅ Cookie banner detected.")
-            # Try a more robust selector for the accept button inside the shadow DOM
-            result = self.page.locator("cmm-cookie-banner").evaluate(
+            self.page.wait_for_selector(shadow_host_selector, timeout=10000, state="attached")
+            logging.info("✅ Cookie banner detected (attached).")
+            # Optional: log if hidden
+            is_hidden = self.page.locator(shadow_host_selector).evaluate(
+                "banner => window.getComputedStyle(banner).display === 'none' || window.getComputedStyle(banner).visibility === 'hidden'"
+            )
+            logging.info(f"Banner hidden: {is_hidden}")
+
+            # Print all buttons for debug
+            buttons = self.page.locator(shadow_host_selector).evaluate(
+                "banner => Array.from(banner.shadowRoot.querySelectorAll('button, wb7-button')).map(e => e.outerHTML)"
+            )
+            logging.info(f"Buttons in the shadow root:\n{buttons}")
+
+            # Try to click the accept-all button using data-test attribute
+            result = self.page.locator(shadow_host_selector).evaluate(
                 """
                 banner => {
-                    // Try the strict selector first
-                    let btn = banner.shadowRoot.querySelector('div > div > div.cmm-cookie-banner__content > cmm-buttons-wrapper > div > div > wb7-button.button.button--accept-all.wb-button.hydrated');
-                    // Fallback: try any button with 'accept' in class or text
-                    if (!btn) {
-                        btn = Array.from(banner.shadowRoot.querySelectorAll('button, wb7-button')).find(
-                            el => el.className.includes('accept-all') || (el.textContent && el.textContent.toLowerCase().includes('accept'))
-                        );
-                    }
+                    const btn = banner.shadowRoot.querySelector('[data-test="handle-accept-all-button"]');
                     if (btn) {
                         btn.click();
                         return true;
@@ -43,18 +50,3 @@ class CookieHandler:
             allure.attach("❌ Cookie banner not found or already accepted.", name="Cookie Acceptance Error", attachment_type=allure.attachment_type.TEXT)
             logging.error(f"❌ Failed to accept cookies: {ex}")
             pytest.fail("Failed to accept cookies.")
-
-# Pytest Test Case Example
-import pytest
-
-@pytest.fixture
-def cookie_handler(page):
-    """Fixture to initialize the CookieHandler with Playwright page."""
-    return CookieHandler(page)
-
-@allure.feature("Cookie Handling")
-@allure.story("Test Cookie Banner Acceptance")
-def test_accept_cookies(cookie_handler):
-    """Test case to verify cookie banner acceptance."""
-    with allure.step("Attempt to accept cookies"):
-        cookie_handler.accept_cookies()

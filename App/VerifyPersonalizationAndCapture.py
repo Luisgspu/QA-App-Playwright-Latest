@@ -2,6 +2,7 @@ import logging
 import allure
 import os
 import pytest
+from App.ScreenshotHandler import ScreenshotHandler
 from playwright.sync_api import Page
 
 def verify_personalization_and_capture(
@@ -14,8 +15,17 @@ def verify_personalization_and_capture(
         # Check userGroup in XHR responses
         with allure.step("🔍 Checking userGroup in XHR responses..."):
             try:
+                logging.info(f"ℹ️ Setting campaign name substring to: {test_name}")
+                xhr_capturer.set_campaign_name_substring(test_name)
+                logging.info("✅ Campaign name substring set successfully.")
+                
                 xhr_data = xhr_capturer.get_captured_data()
-                logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
+                if xhr_data:
+                    import json
+                    allure.attach(json.dumps(xhr_data, indent=2, ensure_ascii=False), name="XHR Responses", attachment_type=allure.attachment_type.JSON)
+                else:
+                    allure.attach("No XHR data captured.", name="XHR Responses", attachment_type=allure.attachment_type.TEXT)
+                    logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
 
                 for response in xhr_data:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
@@ -43,8 +53,8 @@ def verify_personalization_and_capture(
         with allure.step("🔍 Verifying personalized image..."):
             try:
                 expected_src = "/content/dam/hq/personalization/campaignmodule/" if test_name in ["BFV1", "BFV2", "BFV3"] else "/images/dynamic/europe/"
-                selector = "[data-component-name='hp-campaigns']" if ".co.uk" not in urls['HOME_PAGE'] else "body > div.root.responsivegrid.owc-content-container > div > div.responsivegrid.ng-content-root.aem-GridColumn.aem-GridColumn--default--12 > div > div:nth-child(16)"
-
+                selector = "[data-component-name='hp-campaigns']" 
+                
                 # Scroll to the element if the market is UK
                 if ".co.uk" in urls['HOME_PAGE']:
                     with allure.step("📜 Scrolling to the UK-specific element..."):
@@ -54,37 +64,53 @@ def verify_personalization_and_capture(
 
                 # Wait for the images to load and check if any match the expected src
                 images = page.locator(f"{selector} img")
-                images.wait_for(timeout=10000)
+                page.wait_for_function("imgs => imgs.length >= 2", images)
+                count = images.count()
                 matching_src = None
-                for img in images.element_handles():
+                found_srcs = []
+                
+                # Solo busca en la primera y segunda imagen (índices 0 y 1)
+                for i in range(min(2, count)):
+                    img = images.nth(i)
+                    img.wait_for(state="visible", timeout=10000)  # Espera a que cada imagen esté visible
                     src = img.get_attribute("src")
+                    found_srcs.append(src)
                     if src and expected_src in src:
                         matching_src = src
                         break
 
                 if not matching_src:
-                    raise Exception(f"No matching image found with expected src: {expected_src}")
+                    raise Exception(f"No matching image found with expected src: {expected_src} in the first two images.")
 
-                # Attach the found src to the Allure report
-                found_srcs = [img.get_attribute("src") for img in images.element_handles()]
-                allure.attach("\n".join(found_srcs), name="All Found Image Sources", attachment_type=allure.attachment_type.TEXT)
-                allure.attach(matching_src, name="Matching Image Source", attachment_type=allure.attachment_type.TEXT)
+                # Adjunta los src encontrados a Allure
+                allure.attach("\n".join([str(s) for s in found_srcs]), name="First Two Image Sources", attachment_type=allure.attachment_type.TEXT)
+                allure.attach(str(matching_src), name="Matching Image Source", attachment_type=allure.attachment_type.TEXT)
 
                 with allure.step(f"✅ Personalized image with expected src '{expected_src}' was applied correctly."):
                     logging.info(f"✅ Found matching image with src: {matching_src}")
 
+                
                 # Capture screenshot
+                logging.info("📸 Taking screenshot...")
                 screenshot_path = os.path.join(screenshot_dir, f"{test_name}_attempt_{attempt}.png")
-                page.screenshot(path=screenshot_path)
-                attach_screenshot_to_allure(screenshot_path)
 
+                try:
+                    ScreenshotHandler.scroll_and_capture_section(page, screenshot_path)
+                    logging.info(f"✅ Screenshot saved and attached at: {screenshot_path}")
+                except Exception as e:
+                    logging.error(f"❌ Failed to capture or attach screenshot: {e}")
                 test_success = True
 
             except Exception as e:
-                # Capture screenshot on failure
-                screenshot_path = os.path.join(screenshot_dir, f"{test_name}_attempt_{attempt}_error.png")
-                page.screenshot(path=screenshot_path)
-                attach_screenshot_to_allure(screenshot_path)
+                # Capture screenshot
+                logging.info("📸 Taking screenshot...")
+                screenshot_path = os.path.join(screenshot_dir, f"{test_name}_attempt_{attempt}.png")
+
+                try:
+                    ScreenshotHandler.scroll_and_capture_section(page, screenshot_path)
+                    logging.info(f"✅ Screenshot saved and attached at: {screenshot_path}")
+                except Exception as e2:
+                    logging.error(f"❌ Failed to capture or attach screenshot: {e2}")
 
                 with allure.step(f"❌ Image not found in the specified selector. Error: {e}"):
                     logging.error(f"❌ Image not found in the specified selector. Error: {e}")

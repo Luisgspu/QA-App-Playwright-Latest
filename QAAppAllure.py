@@ -39,13 +39,6 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
         allure.attach(f"❌ Could not fetch valid URLs for test '{test_name}' (market: {market_code}, model: {model_code})")
         pytest.fail(f"Missing HOME_PAGE URL for test '{test_name}'")
 
-    # Attach URLs to Allure
-    with allure.step(f"🌐 Fetched URLs for {model_name or 'N/A'} ({body_type or 'N/A'})"):
-        allure.attach(
-            json.dumps(urls, indent=2),
-            name=f"URLs for {model_name or 'N/A'} ({body_type or 'N/A'})",
-            attachment_type=allure.attachment_type.JSON
-        )
 
     # BFV Logic
     if 'CONFIGURATOR' not in urls or not urls['CONFIGURATOR']:
@@ -117,7 +110,7 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "A236"},
+    {"test_name": "BFV1", "market_code": "AT/de", "model_code": "A236"},
     
     
 ]
@@ -175,10 +168,25 @@ def test_run(test_case, screenshot_dir):
     allure.dynamic.id(uid_hashed)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
+        browser = p.chromium.launch(
+        headless=True,  # or False for headed
+        args=[
+            "--start-maximized",
+            "--disable-gpu",
+            "--enable-webgl",
+            "--incognito",
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+            "--window-size=1920,1080",
+           
+        ]
+        )
+        context = browser.new_context(
+            viewport={"width": 1920, "height": 1080},
+            screen={"width": 1920, "height": 1080}
+        )
         page = context.new_page()
-
+        
         try:
             allure.dynamic.parent_suite(f"{market_code}")
             allure.dynamic.suite(f"{test_name}")
