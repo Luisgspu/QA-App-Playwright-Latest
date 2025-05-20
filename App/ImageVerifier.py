@@ -48,12 +48,10 @@ class ImageVerifier:
                 with allure.step(f"❌ Image not found in the specified selector. Expected src: {expected_path}"):
                     logging.warning(f"❌ Image not found in the specified selector. Expected src: {expected_path}")
                     message = f"❌ Test '{test_name}' failed due to image verification error."
-                    allure.attach(message, name="Image Verification Error", attachment_type=allure.attachment_type.TEXT)
                     pytest.fail(message)
                     return False
         except Exception as e:
             message = f"❌ Test '{test_name}' failed due to image verification error: {e}" if test_name else f"❌ Image verification error: {e}"
             logging.error(message)
-            allure.attach(message, name="Image Verification Error", attachment_type=allure.attachment_type.TEXT)
             pytest.fail(message)
             return False

@@ -14,11 +14,13 @@ from App.VerifyPersonalizationAndCapture import verify_personalization_and_captu
 from App.CreateAPIandXHR import create_api_and_xhr
 from App.CookiesHandler import CookieHandler
 from tests import test_bfv1_playwright
+from tests import test_bfv2_playwright
 
 
 # Test mapping
 test_mapping = {
     "BFV1": test_bfv1_playwright.BFV1Test,
+    "BFV2": test_bfv2_playwright.BFV2Test,
   
 }
 
@@ -110,7 +112,7 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "C236"},
+    {"test_name": "BFV2", "market_code": "DE/de", "model_code": "C236"},
     
     
 ]
@@ -169,7 +171,7 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=True,  # or False for headed
+            headless=False,  # or False for headed
             args=[
             "--start-maximized",
             "--disable-gpu",

@@ -14,16 +14,6 @@ def verify_personalization_and_capture(
     Verifies the personalized image and captures XHR responses and screenshots.
     """
     try:
-        # --- Definir substrings de campañas antes de usarlos ---
-        CAMPAIGN_SUBSTRINGS = {
-            "BFV1": "best-fitting-vehicle",
-            "BFV2": "best-fitting-vehicle",
-            "BFV3": "best-fitting-vehicle",
-            # agrega más si es necesario
-        }
-        substring = CAMPAIGN_SUBSTRINGS.get(test_name, test_name)
-
-        # Check userGroup in XHR responses
         with allure.step("🔍 Checking userGroup in XHR responses..."):
             try:
                 logging.info(f"ℹ️ Setting campaign name substring to: {test_name}")
@@ -38,13 +28,10 @@ def verify_personalization_and_capture(
                     allure.attach("No XHR data captured.", name="XHR Responses", attachment_type=allure.attachment_type.TEXT)
                     logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
 
-                for response in xhr_data or []:
+                # Iterate over all campaigns in all responses (no substring filtering)
+                for response in xhr_data:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
-                    filtered_campaigns = [
-                        campaign for campaign in campaigns
-                        if substring.lower() in campaign.get("campaignName", "").lower()
-                    ]
-                    for campaign in filtered_campaigns:
+                    for campaign in campaigns:
                         campaign_name = campaign.get("campaignName", "Unknown Campaign")
                         user_group = campaign.get("userGroup", "Unknown UserGroup")
                         experience_name = campaign.get("experienceName", "Unknown Experience")

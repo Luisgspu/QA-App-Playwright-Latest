@@ -3,7 +3,6 @@ import logging
 import allure
 from playwright.sync_api import Page
 
-
 class XHRResponseCapturer:
     """Captures XHR responses, filtering by Daimler's API."""
 
@@ -18,41 +17,6 @@ class XHRResponseCapturer:
         """Sets up request interception to capture XHR responses."""
         with allure.step("Setting up request interception"):
             self.page.on("response", self._capture_response)
-
-    def _capture_response(self, response):
-        """Captures and filters XHR responses."""
-        try:
-            if self.TARGET_URL_FILTER in response.url and response.status == 200:
-                response_body = response.body()
-                response_text = response_body.decode("utf-8") if response_body else ""
-
-                try:
-                    json_response = json.loads(response_text)
-                    if "campaignResponses" in json_response:
-                        # Filter campaign responses based on the TARGET_CAMPAIGN_NAME_SUBSTRING
-                        filtered_campaigns = [
-                            campaign for campaign in json_response["campaignResponses"]
-                            if self.TARGET_CAMPAIGN_NAME_SUBSTRING.lower() in campaign.get("campaignName", "").lower()
-                        ]
-
-                        # If there are matching campaigns, save the filtered response
-                        if filtered_campaigns:
-                            filtered_response = {
-                                "url": response.url,
-                                "status": response.status,
-                                "body": {"campaignResponses": filtered_campaigns}
-                            }
-                            self.captured_data.append(filtered_response)
-
-                            # Attach filtered response to Allure for debugging
-                            formatted_response = json.dumps(filtered_response, indent=4, ensure_ascii=False)
-                            allure.attach(formatted_response, name=f"Filtered Campaign Response from {response.url}", attachment_type=allure.attachment_type.JSON)
-
-                except json.JSONDecodeError:
-                    allure.attach(response_text, name=f"Raw Response Body from {response.url}", attachment_type=allure.attachment_type.TEXT)
-
-        except Exception as e:
-            logging.error(f"Error capturing response for {response.url}: {e}")
 
     def set_campaign_name_substring(self, test_name: str):
         """Dynamically sets the campaign name substring based on the test name."""
@@ -73,7 +37,36 @@ class XHRResponseCapturer:
             else:
                 self.TARGET_CAMPAIGN_NAME_SUBSTRING = ""  # Default to no filter
             allure.attach(f"Campaign name substring set to: {self.TARGET_CAMPAIGN_NAME_SUBSTRING}", name="Info", attachment_type=allure.attachment_type.TEXT)
+            logging.info(f"Campaign name substring set to: {self.TARGET_CAMPAIGN_NAME_SUBSTRING}")
 
+    def _capture_response(self, response):
+        try:
+            if self.TARGET_URL_FILTER in response.url and response.status == 200:
+                response_body = response.body()
+                response_text = response_body.decode("utf-8") if response_body else ""
+
+                try:
+                    json_response = json.loads(response_text)
+                    if "campaignResponses" in json_response:
+                        all_campaigns = json_response["campaignResponses"]
+                        filtered_campaigns = [
+                            campaign for campaign in all_campaigns
+                            if self.TARGET_CAMPAIGN_NAME_SUBSTRING.lower() in campaign.get("campaignName", "").lower()
+                        ]
+                        if filtered_campaigns:
+                            filtered_response = {
+                                "url": response.url,
+                                "status": response.status,
+                                "body": {"campaignResponses": filtered_campaigns}
+                            }
+                            self.captured_data.append(filtered_response)
+                            logging.info(f"Filtered campaigns: {[c.get('campaignName') for c in filtered_campaigns]}")
+                except json.JSONDecodeError:
+                    logging.warning(f"Could not decode JSON from {response.url}")
+        except Exception as e:
+            logging.error(f"Error capturing response for {response.url}: {e}")
+
+    
     def get_captured_data(self):
         """Returns the captured XHR responses."""
         return self.captured_data

@@ -3,6 +3,9 @@ from playwright.sync_api import sync_playwright
 from ScreenshotHandler import ScreenshotHandler  # Assuming this is in another file
 from playwright.sync_api import Page
 from ImageVerifier import ImageVerifier  # Assuming this is in another file
+from XHRResponseCapturer import XHRResponseCapturer  # Assuming this is the correct import for your XHR capturer
+import json
+from ConfigStarted import ConfiguratorStarted  # Playwright version
 
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -34,9 +37,19 @@ def test_shadow_dom_click():
             screen={"width": 1920, "height": 1080}
         )
         
+        # Capture XHR response
+        test_name = "Last Configuration Started"
+        target_url_filter = "evergage.com/api2/event"
+        
+        
         
         # Open a Home Page
         page = context.new_page()
+        
+        # Verify the XHR response
+        # 1. Instantiate the capturer
+        xhr_capturer = XHRResponseCapturer(page, target_url_filter)
+        
         page.goto(url)
         page.wait_for_load_state("load")
         logging.info(f"✅ Home Page loaded: {url}")
@@ -84,14 +97,18 @@ def test_shadow_dom_click():
             logging.warning("⚠️ Accept button inside shadow root not found.")
         
         # Open PI Page
-        page.goto("https://www.mercedes-benz.de/passengercars/models/suv/eqa/overview.html")
-        page.wait_for_load_state("load")    
-        logging.info(f"✅ PI Page loaded: {url}")
+        page.goto("https://www.mercedes-benz.de/passengercars/mercedes-benz-cars/car-configurator.html/motorization/CCci/DE/de/EQA-KLASSE/OFFROADER?vehicleId=de_DE__2437021__AU-311_LE-L_LU-696_MJ-806_PC-904-P59-PBG-PSA-U59-U62_PS-953%23-B05%23_SA-01U-02B-13U-218-243-258-261-270-286-287-294-310-345-351-355-362-365-367-39U-400-428-475-504-51U-521-537-543-55H-580-5B0-608-632-63B-677-679-70B-72B-73B-79B-7U2-82B-83B-859-873-877-88B-890-942-969-986-9B2-B13-B27-B51-B53-B59-L3E-R05-R31-U01-U10-U12-U22-U35-U55-U60_SC-0S3-0U1-1B3-2U1-2U8-502-51B-5V4-6P5-7B4-7S3-8P3-8S8-8U6-8U8-998-9U8-BAF-EMD-K13-K37-K45-R7H")
+        page.wait_for_load_state("networkidle")
+        logging.info(f"✅ Config Page loaded: {url}")
+        
+        # Perform Configurator actions
+        configurator = ConfiguratorStarted(page)
+        configurator.perform_configurator_actions()
+               
         
         # Go back to Home Page
         page.goto(url)
-        page.wait_for_load_state("load")
-        page.wait_for_timeout(2000)  # Espera 4 segundos, ajusta según necesidad
+        page.wait_for_load_state("networkidle")
         logging.info(f"✅ Navigated Back to Home Page: {url}")
         
         """
@@ -152,6 +169,22 @@ def test_shadow_dom_click():
             logging.warning("⚠️ [data-component-name='hp-campaigns'] not found.")
         
         """
+       
+
+        # 2. Set the campaign name substring for filtering
+        xhr_capturer.set_campaign_name_substring(test_name)
+        
+        # 4. After actions, get and log the filtered XHR data
+        xhr_data = xhr_capturer.get_captured_data()
+        logging.info(f"Filtered XHR data: {json.dumps(xhr_data, indent=2, ensure_ascii=False)}")
+
+        # Optionally, iterate and log campaigns for debugging
+        for response in xhr_data:
+            campaigns = response.get("body", {}).get("campaignResponses", [])
+            for campaign in campaigns:
+                logging.info(f"Filtered campaign: {campaign.get('campaignName', '')}")
+        
+        # Verify the personalized image
         expected_src = "/content/dam/hq/personalization/campaignmodule/"
         verifier = ImageVerifier(page)
         result = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src)

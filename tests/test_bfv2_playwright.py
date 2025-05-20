@@ -36,13 +36,13 @@ class BFV2Test:
         with allure.step(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}"):
             self.page.goto(self.urls['PRODUCT_PAGE'])
             logging.info(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}")
-            self.page.wait_for_load_state("load")
+            self.page.wait_for_load_state("networkidle")
 
         # Navigate to the configurator
         with allure.step(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}"):
             self.page.goto(self.urls['CONFIGURATOR'])
             logging.info(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}")
-            self.page.wait_for_load_state("load")
+            self.page.wait_for_load_state("networkidle")
             
 
         # Call the perform_configurator_actions function from ConfiguratorStarted
@@ -60,7 +60,6 @@ class BFV2Test:
             self.page.goto(self.urls['HOME_PAGE'])
             logging.info(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}")
             self.page.wait_for_load_state("load")
-            self.page.wait_for_timeout(2000)
 
     @allure.step("Navigate to Salesforce URL")
     @allure.id(generate_test_uuid("navigate_to_salesforce"))

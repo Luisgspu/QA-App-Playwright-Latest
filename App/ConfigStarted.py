@@ -9,7 +9,12 @@ class ConfiguratorStarted:
     def expand_shadow_element(self, shadow_host_selector):
         """Returns the shadow root handle for a given shadow host selector."""
         shadow_host = self.page.locator(shadow_host_selector).element_handle()
+        if not shadow_host:
+            logging.error(f"❌ Shadow host not found for selector: {shadow_host_selector}")
+            return None
         shadow_root = self.page.evaluate_handle("el => el.shadowRoot", shadow_host)
+        if not shadow_root:
+            logging.error(f"❌ Shadow root not found for host: {shadow_host_selector}")
         return shadow_root
 
     def perform_configurator_actions(self):
@@ -23,6 +28,9 @@ class ConfiguratorStarted:
                 "div.responsivegrid.ng-content-root.aem-GridColumn.aem-GridColumn--default--12 > div > owcc-car-configurator"
             )
             shadow_root = self.expand_shadow_element(shadow_host_selector)
+            if not shadow_root:
+                logging.error("❌ Could not expand shadow root. Aborting configurator actions.")
+                return
             logging.info("✅ Shadow DOM expanded.")
 
             # Access main <ul> inside navigation
@@ -33,6 +41,9 @@ class ConfiguratorStarted:
                 )""",
                 shadow_root
             )
+            if not main_frame:
+                logging.error("❌ Main <ul> element not found in shadow DOM.")
+                return
             self.page.evaluate("el => el.scrollIntoView()", main_frame)
             logging.info("✅ Scrolled to the main frame (ul element).")
             self.page.evaluate("el => el.click()", main_frame)
@@ -46,6 +57,9 @@ class ConfiguratorStarted:
                 )""",
                 shadow_root
             )
+            if not second_child:
+                logging.error("❌ Second <li> element not found in navigation.")
+                return
             self.page.evaluate("el => el.scrollIntoView()", second_child)
             logging.info("✅ Scrolled to the second child element (li:nth-child(2)).")
             self.page.evaluate("el => el.focus()", second_child)
@@ -56,12 +70,15 @@ class ConfiguratorStarted:
                 link_inside = self.page.evaluate_handle(
                     "el => el.querySelector('a, button')", second_child
                 )
-                self.page.evaluate("el => el.click()", link_inside)
-                logging.info("✅ Clicked on inner clickable element (a/button).")
-            except Exception:
+                if link_inside:
+                    self.page.evaluate("el => el.click()", link_inside)
+                    logging.info("✅ Clicked on inner clickable element (a/button).")
+                else:
+                    raise Exception("No <a> or <button> found inside <li>.")
+            except Exception as e:
                 # Fallback: click the <li> itself
                 self.page.evaluate("el => el.click()", second_child)
-                logging.info("✅ Fallback click on <li> using JavaScript.")
+                logging.warning(f"⚠️ Fallback click on <li> using JavaScript. Reason: {e}")
 
             self.page.wait_for_timeout(2000)
 
