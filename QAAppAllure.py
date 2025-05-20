@@ -17,6 +17,10 @@ from App.XHRResponseCapturer import XHRResponseCapturer
 from tests import test_bfv1_playwright
 from tests import test_bfv2_playwright
 from tests import test_bfv3_playwright
+from tests import test_LastConfigStarted_playwright
+from tests import test_LastConfigCompleted_playwright
+from tests import test_LastSeenSRP_playwright
+from tests import test_LastSeenPDP_playwright
 
 
 # Test mapping
@@ -24,6 +28,10 @@ test_mapping = {
     "BFV1": test_bfv1_playwright.BFV1Test,
     "BFV2": test_bfv2_playwright.BFV2Test,
     "BFV3": test_bfv3_playwright.BFV3Test,
+    "Last Configuration Started": test_LastConfigStarted_playwright.LCStartedTest,
+    "Last Configuration Completed": test_LastConfigCompleted_playwright.LCCompletedTest,
+    "Last Seen SRP": test_LastSeenSRP_playwright.LSeenSRPTest,
+    "Last Seen PDP": test_LastSeenPDP_playwright.LSeenPDPTest
   
 }
 
@@ -115,8 +123,9 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV3", "market_code": "DE/de", "model_code": "C236"},
-    
+
+    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "C236"},
+
     
 ]
 
@@ -156,6 +165,9 @@ CAMPAIGN_FILTERS = {
     "BFV3": "best-fitting-vehicle",
     "Last Configuration Started": "last-configuration",
     "Last Configuration Completed": "last-configuration",
+    "Last Seen SRP": "dcp-last-seen-srp",
+    "Last Seen PDP": "dcp-last-seen-pdp",
+    
     # Add more as needed
 }
 

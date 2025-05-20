@@ -1,41 +1,71 @@
-from playwright.sync_api import sync_playwright
-import pytest
-import allure
-import json
 import logging
+import allure
+import uuid
+from App.ConfigCompleted import ConfiguratorCompleted  # Should use Playwright Page
 
-@pytest.fixture(scope="function")
-def setup_browser():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
-        yield page
-        context.close()
-        browser.close()
+def generate_test_uuid(test_name):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, test_name))
 
-def test_last_config_completed(setup_browser):
-    page = setup_browser
-    target_url = "https://example.com"  # Replace with the actual URL
+class LCCompletedTest:
+    def __init__(self, page, urls, test_link=None):
+        self.page = page  # Playwright Page
+        self.urls = urls
+        self.test_link = test_link
+        self.retries = 0
+        self.max_retries = 5
 
-    logging.info(f"🌍 Navigating to: {target_url}")
-    page.goto(target_url)
+    @allure.feature("Last Configuration Completed Test Suite")
+    @allure.story("Run Last Configuration Completed Test")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.id(generate_test_uuid("run_LCCompleted_test"))
+    def run(self):
+        try:
+            self.perform_LCCompleted_test()
+            if self.test_link:
+                self.navigate_to_salesforce()
+        except Exception as e:
+            logging.error(f"❌ Error during Last Configuration Completed test: {e}")
+            allure.attach(f"Error: {e}", name="Test Error", attachment_type=allure.attachment_type.TEXT)
 
-    # Example of interacting with the page
-    try:
-        page.wait_for_selector("selector-for-element")  # Replace with actual selector
-        logging.info("✅ Element found.")
-    except Exception as e:
-        logging.error(f"❌ Error finding element: {e}")
-        allure.attach(f"Error finding element: {str(e)}", name="Element Finding Error", attachment_type=allure.attachment_type.TEXT)
-        pytest.fail(f"Error finding element: {e}")
+    @allure.step("Perform Last Configuration Completed Logic")
+    @allure.id(generate_test_uuid("perform_LCCompleted_test"))
+    def perform_LCCompleted_test(self):
+        """Perform the main Last Configuration Completed test logic."""
+        configurator = ConfiguratorCompleted(self.page)
+        try:
+            # Navigate to CONFIGURATOR
+            with allure.step(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}"):
+                self.page.goto(self.urls['CONFIGURATOR'])
+                logging.info(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}")
+                self.page.wait_for_load_state("networkidle")
 
-    # Additional test logic goes here
+            # Execute actions in CONFIGURATOR
+            with allure.step("✅ Performing configuration actions"):
+                try:
+                    configurator.perform_configurator_actions()
+                    logging.info("✅ Successfully performed configuration actions.")
+                except Exception as e:
+                    logging.error(f"❌ Error performing configuration actions: {e}")
+                    allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
+                    raise
+        except Exception as e:
+            logging.error(f"❌ Error in configurator: {e}")
 
-    # Example of attaching a screenshot
-    screenshot_path = "screenshot.png"
-    page.screenshot(path=screenshot_path)
-    allure.attach.file(screenshot_path, name="Screenshot", attachment_type=allure.attachment_type.PNG)
+        # Navigate back to the home page
+        with allure.step(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}"):
+            self.page.goto(self.urls['HOME_PAGE'])
+            logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
+            self.page.wait_for_load_state("networkidle")
 
-    # Final assertions and cleanup
-    assert True  # Replace with actual assertions as needed
+    @allure.step("Navigate to Salesforce URL")
+    @allure.id(generate_test_uuid("navigate_to_salesforce"))
+    def navigate_to_salesforce(self):
+        """Navigate to the Salesforce URL if test_link is provided."""
+        try:
+            salesforce_url = self.urls['HOME_PAGE'] + self.test_link
+            self.page.goto(salesforce_url)
+            logging.info(f"🌍 Navigated to Salesforce URL: {salesforce_url}")
+            self.page.wait_for_load_state("networkidle")
+        except Exception as e:
+            logging.error(f"❌ Error navigating to Salesforce URL: {e}")
+            allure.attach(f"Error: {e}", name="Salesforce Navigation Error", attachment_type=allure.attachment_type.TEXT)
