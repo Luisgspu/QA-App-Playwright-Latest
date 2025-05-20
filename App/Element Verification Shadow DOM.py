@@ -6,6 +6,7 @@ from ImageVerifier import ImageVerifier  # Assuming this is in another file
 from XHRResponseCapturer import XHRResponseCapturer  # Assuming this is the correct import for your XHR capturer
 import json
 from ConfigStarted import ConfiguratorStarted  # Playwright version
+from ConfigCompleted import ConfiguratorCompleted  # Playwright version
 
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -14,7 +15,7 @@ def test_shadow_dom_click():
     url = "https://www.mercedes-benz.de"
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=True,
+            headless=False,
             args=[
                 "--start-maximized",
                 "--disable-gpu",
@@ -99,7 +100,7 @@ def test_shadow_dom_click():
         page.wait_for_load_state("networkidle")
         logging.info(f"✅ PI Page loaded: {url}")
         
-        """
+        
          # Open PI Page
         page.goto("https://www.mercedes-benz.de/passengercars/mercedes-benz-cars/car-configurator.html/motorization/CCci/DE/de/CLE-KLASSE/COUPE")
         page.wait_for_load_state("networkidle")
@@ -107,10 +108,10 @@ def test_shadow_dom_click():
         
         
         # Perform Configurator actions
-        configurator = ConfiguratorStarted(page)
+        configurator = ConfiguratorCompleted(page)
         configurator.perform_configurator_actions()
                
-        """
+        
 
         # Go back to Home Page
         page.goto(url)

@@ -1,52 +1,75 @@
-from playwright.sync_api import sync_playwright
-import pytest
-import json
 import logging
-from App.VerifyPersonalizationAndCapture import verify_personalization_and_capture
-from App.CreateAPIandXHR import create_api_and_xhr
+import time
+import allure
+import uuid
+from App.ConfigCompleted import ConfiguratorCompleted  # This should use Playwright Page
+from playwright.sync_api import Page, sync_playwright
 
-@pytest.fixture(scope="function")
-def setup_browser():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
-        yield page
-        context.close()
-        browser.close()
 
-def run_test(page, test_name, urls):
-    test_success = False
+# Generate a consistent UUID for the test using the test name
+def generate_test_uuid(test_name):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, test_name))
 
-    if not urls or 'HOME_PAGE' not in urls or not urls['HOME_PAGE']:
-        logging.error(f"❌ Missing HOME_PAGE URL for test '{test_name}'.")
-        pytest.fail(f"Missing HOME_PAGE URL for test '{test_name}'")
+class BFV3Test:
+    def __init__(self, page, urls, test_link=None):
+        self.page = page  # Playwright Page
+        self.urls = urls
+        self.test_link = test_link
+        self.retries = 0
+        self.max_retries = 5  # Maximum number of retries
 
-    try:
-        logging.info(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']}")
-        page.goto(urls['HOME_PAGE'])
-        page.wait_for_load_state("networkidle")
-    except Exception as e:
-        logging.error(f"❌ Error navigating to HOME_PAGE: {e}")
-        pytest.fail(f"Error navigating to HOME_PAGE: {e}")
+    @allure.feature("BFV3 Test Suite")
+    @allure.story("Run BFV3 Test")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.id(generate_test_uuid("run_bfv3_test"))
+    def run(self):
+        try:
+            self.perform_bfv3_test()
+            if self.test_link:
+                self.navigate_to_salesforce()
+        except Exception as e:
+            logging.error(f"❌ Error during BFV3 test: {e}")
 
-    # Additional test logic goes here...
+    @allure.step("Perform BFV3 Test Logic")
+    @allure.id(generate_test_uuid("perform_bfv3_test"))
+    def perform_bfv3_test(self):
+        """Perform the main BFV3 test logic."""
+        configurator = ConfiguratorCompleted(self.page)
 
-    # Example of verifying personalization
-    test_success = verify_personalization_and_capture(page, test_name)
+        # Navigate to the product page
+        with allure.step(f"🌍 Navigated to: {self.urls['PRODUCT_PAGE']}"):
+            self.page.goto(self.urls['PRODUCT_PAGE'])
+            logging.info(f"🌍 Navigated to: {self.urls['PRODUCT_PAGE']}")
+            self.page.wait_for_load_state("networkidle")
 
-    if not test_success:
-        failure_message = f"❌ Test '{test_name}' failed."
-        logging.error(failure_message)
-        pytest.fail(failure_message)
+        # Navigate to CONFIGURATOR
+        with allure.step(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}"):
+            self.page.goto(self.urls['CONFIGURATOR'])
+            logging.info(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}")
+            self.page.wait_for_load_state("networkidle")
 
-@pytest.mark.parametrize("test_case", [
-    {"test_name": "BFV3", "urls": {"HOME_PAGE": "https://example.com/home"}}  # Replace with actual URLs
-])
-def test_bfv3_playwright(test_case, setup_browser):
-    test_name = test_case['test_name']
-    urls = test_case.get('urls', {})
-    
-    logging.info(f"Running test case: {json.dumps(test_case, indent=2)}")
-    
-    run_test(setup_browser, test_name, urls)
+        # Execute actions in CONFIGURATOR
+        with allure.step("✅ Performing configuration actions"):
+            try:
+                configurator.perform_configurator_actions()
+
+                logging.info("✅ Successfully performed configuration actions.")
+            except Exception as e:
+                logging.error(f"❌ Error performing configuration actions: {e}")
+                allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
+                raise
+
+        # Navigate back to the home page
+        with allure.step(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}"):
+            self.page.goto(self.urls['HOME_PAGE'])
+            logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
+            self.page.wait_for_load_state("networkidle")
+
+    @allure.step("Navigate to Salesforce URL")
+    @allure.id(generate_test_uuid("navigate_to_salesforce"))
+    def navigate_to_salesforce(self):
+        """Navigate to the Salesforce URL if test_link is provided."""
+        salesforce_url = self.urls['HOME_PAGE'] + self.test_link
+        self.page.goto(salesforce_url)
+        logging.info(f"🌍 Navigated to Salesforce URL: {salesforce_url}")
+        self.page.wait_for_load_state("networkidle")
