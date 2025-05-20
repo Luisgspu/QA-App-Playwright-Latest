@@ -14,12 +14,9 @@ def verify_personalization_and_capture(
     Verifies the personalized image and captures XHR responses and screenshots.
     """
     try:
+        # Check userGroup in XHR responses
         with allure.step("🔍 Checking userGroup in XHR responses..."):
             try:
-                logging.info(f"ℹ️ Setting campaign name substring to: {test_name}")
-                xhr_capturer.set_campaign_name_substring(test_name)
-                logging.info("✅ Campaign name substring set successfully.")
-
                 xhr_data = xhr_capturer.get_captured_data()
                 if xhr_data:
                     import json
@@ -28,13 +25,16 @@ def verify_personalization_and_capture(
                     allure.attach("No XHR data captured.", name="XHR Responses", attachment_type=allure.attachment_type.TEXT)
                     logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
 
-                # Iterate over all campaigns in all responses (no substring filtering)
+                # Iterate over all campaigns in all responses and log the full campaign response
                 for response in xhr_data:
                     campaigns = response.get("body", {}).get("campaignResponses", [])
                     for campaign in campaigns:
                         campaign_name = campaign.get("campaignName", "Unknown Campaign")
                         user_group = campaign.get("userGroup", "Unknown UserGroup")
                         experience_name = campaign.get("experienceName", "Unknown Experience")
+
+                        # Log the full campaign response
+                        logging.info(f"Full campaign response: {json.dumps(campaign, indent=2, ensure_ascii=False)}")
 
                         if "Control Group" in experience_name or user_group.lower() == "control":
                             with allure.step(f"❌ Campaign '{campaign_name}' is in the Control Group. Retrying test."):

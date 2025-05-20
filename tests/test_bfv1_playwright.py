@@ -50,7 +50,7 @@ class BFV1Test:
         # Navigate back to the home page
         with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
             self.page.goto(self.urls['HOME_PAGE'])
-            self.page.wait_for_load_state("load")
+            self.page.wait_for_load_state("networkidle")
             logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
 
     @allure.step("Navigate to Salesforce URL")

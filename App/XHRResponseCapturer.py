@@ -49,10 +49,14 @@ class XHRResponseCapturer:
                     json_response = json.loads(response_text)
                     if "campaignResponses" in json_response:
                         all_campaigns = json_response["campaignResponses"]
-                        filtered_campaigns = [
-                            campaign for campaign in all_campaigns
-                            if self.TARGET_CAMPAIGN_NAME_SUBSTRING.lower() in campaign.get("campaignName", "").lower()
-                        ]
+                        # Only filter if a substring is set, otherwise include all
+                        if self.TARGET_CAMPAIGN_NAME_SUBSTRING:
+                            filtered_campaigns = [
+                                campaign for campaign in all_campaigns
+                                if self.TARGET_CAMPAIGN_NAME_SUBSTRING.lower() in campaign.get("campaignName", "").lower()
+                            ]
+                        else:
+                            filtered_campaigns = all_campaigns
                         if filtered_campaigns:
                             filtered_response = {
                                 "url": response.url,

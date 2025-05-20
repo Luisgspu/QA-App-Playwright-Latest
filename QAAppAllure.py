@@ -13,6 +13,7 @@ from App.vehicle_api import VehicleAPI
 from App.VerifyPersonalizationAndCapture import verify_personalization_and_capture
 from App.CreateAPIandXHR import create_api_and_xhr
 from App.CookiesHandler import CookieHandler
+from App.XHRResponseCapturer import XHRResponseCapturer
 from tests import test_bfv1_playwright
 from tests import test_bfv2_playwright
 
@@ -112,7 +113,8 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 
 # Manually defined test cases
 manual_test_cases = [
-    {"test_name": "BFV2", "market_code": "DE/de", "model_code": "C236"},
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "C236"},
+    {"test_name": "BFV1", "market_code": "AT/de", "model_code": "C236"},
     
     
 ]
@@ -146,6 +148,16 @@ for manual_case in manual_test_cases:
 # Combine manual and dynamic test cases
 all_test_cases = manual_test_cases + dynamic_test_cases
 
+# Mapping for campaign substring filters
+CAMPAIGN_FILTERS = {
+    "BFV1": "best-fitting-vehicle",
+    "BFV2": "best-fitting-vehicle",
+    "BFV3": "best-fitting-vehicle",
+    "Last Configuration Started": "last-configuration",
+    "Last Configuration Completed": "last-configuration",
+    # Add more as needed
+}
+
 @pytest.mark.parametrize("test_case", all_test_cases)
 def test_run(test_case, screenshot_dir):
     """
@@ -171,29 +183,37 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,  # or False for headed
+            headless=True,  # or False for headed
             args=[
-            "--start-maximized",
-            "--disable-gpu",
-            "--enable-webgl",
-            "--incognito",
-            "--disable-dev-shm-usage",
-            "--no-sandbox",
-            "--window-size=1920,1080",
-            "--disable-blink-features=AutomationControlled",
-            "--disable-infobars",
-            "--disable-extensions",
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "--disable-features=IsolateOrigins,site-per-process",
-            "--blink-settings=imagesEnabled=true"
-        ]
-    )
+                "--start-maximized",
+                "--disable-gpu",
+                "--enable-webgl",
+                "--incognito",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+                "--window-size=1920,1080",
+                "--disable-blink-features=AutomationControlled",
+                "--disable-infobars",
+                "--disable-extensions",
+                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "--disable-features=IsolateOrigins,site-per-process",
+                "--blink-settings=imagesEnabled=true"
+            ]
+        )
         context = browser.new_context(
             viewport={"width": 1920, "height": 1080},
             screen={"width": 1920, "height": 1080}
         )
         page = context.new_page()
-        
+
+        # Use the mapping to get the correct substring for filtering
+        substring = CAMPAIGN_FILTERS.get(test_name, "")
+        xhr_capturer = XHRResponseCapturer(
+            page,
+            target_url_filter="evergage.com/api2/event",
+            target_campaign_name_substring=substring
+        )
+
         try:
             allure.dynamic.parent_suite(f"{market_code}")
             allure.dynamic.suite(f"{test_name}")
@@ -218,7 +238,8 @@ def test_run(test_case, screenshot_dir):
             base_test_name = test_name.split(" - ")[0]
 
             try:
-                api_and_xhr = create_api_and_xhr(page)
+                # If you use create_api_and_xhr, update it to accept and use xhr_capturer if needed
+                api_and_xhr = (VehicleAPI("YOUR_ACCESS_TOKEN"), xhr_capturer)
                 if api_and_xhr is None or api_and_xhr[1] is None:
                     logging.error("❌ Failed to initialize API and XHR capturer.")
                     allure.attach("❌ Failed to initialize API and XHR capturer.", name="Initialization Error", attachment_type=allure.attachment_type.TEXT)
