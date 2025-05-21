@@ -1,7 +1,7 @@
 import logging
 import allure
 import uuid
-from App.ConfigStarted import ConfiguratorStarted  # Should accept Playwright Page
+from Utils.ConfigStarted import ConfiguratorStarted  # Should accept Playwright Page
 
 def generate_test_uuid(test_name):
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, test_name))

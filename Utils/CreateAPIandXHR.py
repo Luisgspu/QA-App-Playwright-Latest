@@ -1,5 +1,5 @@
-from App.vehicle_api import VehicleAPI
-from App.XHRResponseCapturer import XHRResponseCapturer  # If this is in another file
+from Utils.vehicle_api import VehicleAPI
+from Utils.XHRResponseCapturer import XHRResponseCapturer  # If this is in another file
 
 TARGET_URL_FILTER = "https://daimleragemea.germany-2.evergage.com/"
 

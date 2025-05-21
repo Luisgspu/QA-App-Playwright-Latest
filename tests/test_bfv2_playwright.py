@@ -3,7 +3,7 @@ import allure
 import pytest
 import uuid
 from playwright.sync_api import Page, sync_playwright
-from App.ConfigStarted import ConfiguratorStarted  # Playwright version
+from Utils.ConfigStarted import ConfiguratorStarted  # Playwright version
 
 def generate_test_uuid(test_name):
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, test_name))

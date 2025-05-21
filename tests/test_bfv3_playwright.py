@@ -2,7 +2,7 @@ import logging
 import time
 import allure
 import uuid
-from App.ConfigCompleted import ConfiguratorCompleted  # This should use Playwright Page
+from Utils.ConfigCompleted import ConfiguratorCompleted  # This should use Playwright Page
 from playwright.sync_api import Page, sync_playwright
 
 

@@ -1,12 +1,12 @@
 # QA-App-Allure-Testing
 
 ## Overview
-This project is designed for automated testing of web applications using Playwright and pytest. It includes various modules for handling screenshots, XHR responses, cookies, and API interactions, as well as a suite of test cases that validate different functionalities of the application.
+This project is designed for automated testing of web applications using [Playwright](https://playwright.dev/python/), [pytest](https://docs.pytest.org/), and [Allure](https://docs.qameta.io/allure/). It includes modules for handling screenshots, XHR responses, cookies, and API interactions, as well as a suite of test cases that validate different functionalities of the application.
 
 ## Project Structure
 ```
 QA-App-Allure-Testing
-├── App
+├── Utils
 │   ├── ScreenshotHandler.py
 │   ├── XHRResponseCapturer.py
 │   ├── CookiesHandler.py
@@ -18,29 +18,7 @@ QA-App-Allure-Testing
 │   ├── vehicle_api.py
 │   ├── modelcodesAPI.py
 │   └── ImageVerifier.py
-├── TestsCodes
-│   ├── test_bfv1.py
-│   ├── test_bfv2.py
-│   ├── test_bfv3.py
-│   ├── test_LastConfigStarted.py
-│   ├── test_LastConfigCompleted.py
-│   ├── test_LastSeenSRP.py
-│   ├── test_LastSeenPDP.py
-│   ├── PersonalizedCTA1_test.py
-│   ├── PersonalizedCTA2_test.py
-│   ├── PersonalizedCTA3_test.py
-│   └── PersonalizedCTA4_test.py
-├── playwright
-│   ├── browser_setup.py
-│   ├── page_objects
-│   │   ├── home_page.py
-│   │   ├── configurator_page.py
-│   │   └── test_drive_page.py
-│   └── utils
-│       ├── api_handler.py
-│       ├── screenshot_handler.py
-│       └── xhr_handler.py
-├── tests
+├── Tests
 │   ├── test_bfv1_playwright.py
 │   ├── test_bfv2_playwright.py
 │   ├── test_bfv3_playwright.py
@@ -52,43 +30,173 @@ QA-App-Allure-Testing
 │   ├── PersonalizedCTA2_test_playwright.py
 │   ├── PersonalizedCTA3_test_playwright.py
 │   └── PersonalizedCTA4_test_playwright.py
+├── test_dictionaries
+│   ├── BFV1.json
+│   ├── BFV2.json
+│   ├── BFV3.json
+│   ├── Last Seen SRP.json
+│   ├── Last Seen PDP.json
+│   ├── Last Configuration Started.json
+│   ├── Las Configuration Completed.json
 ├── requirements.txt
+├── QAAppAllure.py
 ├── pytest.ini
-└── .gitignore
+├── .gitignore
+└── README.md
 ```
 
 ## Setup Instructions
+
 1. **Clone the repository**:
-   ```
+   ```sh
    git clone <repository-url>
    cd QA-App-Allure-Testing
    ```
 
 2. **Install dependencies**:
    Ensure you have Python installed, then run:
-   ```
+   ```sh
    pip install -r requirements.txt
    ```
 
 3. **Install Playwright Browsers**:
    After installing Playwright, you need to install the necessary browsers:
-   ```
+   ```sh
    playwright install
    ```
 
-## Running Tests
-To run the tests, use the following command:
+## Test Flow
+
+The main test orchestration is handled in `QAAppAllure.py`. Here’s how the test flow works:
+
+1. **Defining Test Cases**  
+   - The `manual_test_cases` list in `QAAppAllure.py` defines which tests to run.
+   - Each entry specifies a `test_name`, `market_code`, and optionally a `model_code`.
+     - If `model_code` is provided: Only that specific model will be tested for the given market and test type.
+     - If `model_code` is omitted or set to `None`: The test will run for **all available models** in the specified market for that test type.
+
+2. **Fetching URLs and Building Test Cases**  
+   - For each entry in `manual_test_cases`, the script calls the `VehicleAPI` to fetch all necessary URLs and metadata for the test.
+     - If a `model_code` is specified, only URLs for that model are fetched.
+     - If no `model_code` is specified, the API returns URLs for **all models** in that market, and a test case is created for each model.
+   - The result is a combined list of test cases (`all_test_cases`) that includes both manually specified and dynamically generated cases.
+
+3. **Test Execution**  
+   - The test runner uses `pytest.mark.parametrize` to execute the `test_run` function for each test case in `all_test_cases`.
+   - For each test case:
+     1. The test context is set up (browser, context, page, XHR capturer, etc.).
+     2. The appropriate test logic is selected based on `test_name` (e.g., BFV1, Last Configuration Started, etc.).
+     3. The test navigates to the required URLs, performs actions, and validates personalization/campaign logic.
+     4. Results and failures are reported to Allure.
+
+4. **Allure Reporting**  
+   - Each test case is reported in Allure with details such as market, model, test type, and any relevant tags.
+   - If you specify a `model_code` in `manual_test_cases`, only that model is tested and reported.
+   - If you omit `model_code`, **all models** for the given market and test type are tested and reported as separate suites in Allure.
+
+### Example
+
+```python
+manual_test_cases = [
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},  # Only S214 model
+    {"test_name": "Last Seen SRP", "market_code": "DE/de"},               # All models in DE/de
+]
 ```
+- The first entry will test only the S214 model for BFV1 in DE/de.
+- The second entry will test **all models** for "Last Seen SRP" in DE/de.
+
+## Running Tests
+
+To run all tests:
+```sh
 pytest
 ```
 
-You can also run specific tests by specifying the test file:
-```
+To run a specific test file:
+```sh
 pytest tests/test_bfv1_playwright.py
 ```
 
+To generate an Allure report after running tests:
+```sh
+allure serve allure-results
+```
+
+## .gitignore
+
+A recommended `.gitignore` for this project:
+
+```
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+*.log
+
+# VSCode
+.vscode/
+.history/
+
+# Tests
+/Tests/*.png
+
+# Tests
+/Tests/*.png
+
+# Allure
+allure-results/
+allure-report/
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.*
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+
+# Misc
+*.swp
+*.bak
+*.tmp
+*.orig
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage
+htmlcov/
+.coverage
+.tox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+.pyre/
+```
+
 ## Contributing
+
 Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
 
 ## License
+
 This project is licensed under the MIT License. See the LICENSE file for details.

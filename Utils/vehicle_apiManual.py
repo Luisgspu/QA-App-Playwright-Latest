@@ -3,7 +3,7 @@ import allure
 import requests
 import logging
 from playwright.sync_api import sync_playwright
-from App.modelcodesAPI import ModelCodesAPI  # Importing from the separate module
+from modelcodesAPI import ModelCodesAPI  # Importing from the separate module
 
 
 class VehicleAPI:
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     # Replace with your actual access token and market code
     access_token = "YOUR_ACCESS_TOKEN"
-    market_code = "CH/it"
+    market_code = "DE/de"
     model_code = ""  # Replace with a specific model code if needed, e.g., "X123"
 
     # Initialize VehicleAPI

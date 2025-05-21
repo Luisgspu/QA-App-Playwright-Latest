@@ -2,10 +2,10 @@ import logging
 import allure
 import os
 import pytest
-from App.ScreenshotHandler import ScreenshotHandler
+from Utils.ScreenshotHandler import ScreenshotHandler
 from playwright.sync_api import Page
-from App.ImageVerifier import ImageVerifier
-from App.XHRResponseCapturer import XHRResponseCapturer  # Assuming this is the correct import for your XHR capturer
+from Utils.ImageVerifier import ImageVerifier
+from Utils.XHRResponseCapturer import XHRResponseCapturer  # Assuming this is the correct import for your XHR capturer
 
 def verify_personalization_and_capture(
         page: Page, test_name: str, model_name: str, body_type: str, attempt: int, screenshot_dir: str,

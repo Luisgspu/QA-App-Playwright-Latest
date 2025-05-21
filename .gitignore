@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+.eggs/
+*.log
+
+# VSCode
+.vscode/
+.history/
+
+# Tests
+/Tests/*.png
+
+# Allure
+allure-results/
+allure-report/
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.*
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+
+# Misc
+*.swp
+*.bak
+*.tmp
+*.orig
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage
+htmlcov/
+.coverage
+.tox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+.pyre/
+

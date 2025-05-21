@@ -9,18 +9,18 @@ import allure
 from playwright.sync_api import sync_playwright
 
 # Local Module Imports
-from App.vehicle_api import VehicleAPI
-from App.VerifyPersonalizationAndCapture import verify_personalization_and_capture
-from App.CreateAPIandXHR import create_api_and_xhr
-from App.CookiesHandler import CookieHandler
-from App.XHRResponseCapturer import XHRResponseCapturer
-from tests import test_bfv1_playwright
-from tests import test_bfv2_playwright
-from tests import test_bfv3_playwright
-from tests import test_LastConfigStarted_playwright
-from tests import test_LastConfigCompleted_playwright
-from tests import test_LastSeenSRP_playwright
-from tests import test_LastSeenPDP_playwright
+from Utils.vehicle_api import VehicleAPI
+from Utils.VerifyPersonalizationAndCapture import verify_personalization_and_capture
+from Utils.CreateAPIandXHR import create_api_and_xhr
+from Utils.CookiesHandler import CookieHandler
+from Utils.XHRResponseCapturer import XHRResponseCapturer
+from Tests import test_bfv1_playwright
+from Tests import test_bfv2_playwright
+from Tests import test_bfv3_playwright
+from Tests import test_LastConfigStarted_playwright
+from Tests import test_LastConfigCompleted_playwright
+from Tests import test_LastSeenSRP_playwright
+from Tests import test_LastSeenPDP_playwright
 
 
 # Test mapping
@@ -124,9 +124,14 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 # Manually defined test cases
 manual_test_cases = [
 
-    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "C236"},
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "BFV2", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "BFV3", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "Last Configuration Started", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "Last Configuration Completed", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "Last Seen PDP", "market_code": "DE/de", "model_code": "S214"},
 
-    
 ]
 
 # Fetch dynamic test cases for manual model codes

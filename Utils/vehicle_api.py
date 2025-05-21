@@ -3,7 +3,7 @@ import allure
 import requests
 import logging
 from playwright.sync_api import sync_playwright
-from modelcodesAPI import ModelCodesAPI  # Importing from the separate module
+from Utils.modelcodesAPI import ModelCodesAPI  # Importing from the separate module
 
 
 class VehicleAPI:
