@@ -47,6 +47,7 @@ QA-App-Allure-Testing
 ├── QAAppAllure.py
 ├── pytest.ini
 ├── .gitignore
+├── Dockerfile
 └── README.md
 ```
 
@@ -141,6 +142,55 @@ C:\Allure\allure-2.33.0\bin\allure serve allure-results
 - The second command starts a local server to view the report in your browser.
 
 Make sure to adjust the path if your Allure installation is in a different location.
+
+## Running Tests with Docker
+
+You can also run your tests in a fully isolated and reproducible environment using Docker. This is especially useful for CI/CD pipelines and when deploying to cloud environments like Azure Kubernetes Service.
+
+### 1. Build the Docker image
+
+```sh
+docker build -t qa-app-allure .
+```
+
+### 2. Run the tests in a Docker container
+
+```sh
+docker run --rm -v "${PWD}\allure-results:/app/allure-results" qa-app-allure
+```
+> On Linux/macOS, use `-v "$PWD/allure-results:/app/allure-results"` instead.
+
+This command will execute your tests inside the container and save the Allure results to your local `allure-results` directory.
+
+### 3. Generate and view the Allure report
+
+After running the tests, generate and serve the Allure report as usual:
+
+```sh
+C:\Allure\allure-2.33.0\bin\allure generate allure-results -o allure-report --clean
+C:\Allure\allure-2.33.0\bin\allure serve allure-results
+```
+
+### Dockerfile Example
+
+Your project includes a `Dockerfile` similar to the following:
+
+```dockerfile
+FROM python:3.11
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install playwright && playwright install --with-deps
+
+COPY . .
+
+CMD ["pytest", "QAAppAllure.py", "-n", "4", "-s", "-v", "--reruns", "4", "--alluredir=allure-results"]
+```
+
+This ensures your tests run in a consistent environment, both locally and in CI/CD.
 
 ## .gitignore
 
