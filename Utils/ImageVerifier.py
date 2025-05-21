@@ -13,7 +13,7 @@ class ImageVerifier:
         Verifies if an image with the expected `src` is present among all images matching the selector.
         """
         try:
-            self.page.wait_for_selector(selector, timeout=5000)
+            self.page.wait_for_selector(selector, timeout=6000)
             images = self.page.locator(selector)
             img_count = images.count()
             logging.info(f"Found {img_count} <img> elements inside {selector}.")

@@ -15,20 +15,17 @@ class BFV3Test:
         self.page = page  # Playwright Page
         self.urls = urls
         self.test_link = test_link
-        self.retries = 0
-        self.max_retries = 5  # Maximum number of retries
+
 
     @allure.feature("BFV3 Test Suite")
     @allure.story("Run BFV3 Test")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.id(generate_test_uuid("run_bfv3_test"))
     def run(self):
-        try:
-            self.perform_bfv3_test()
-            if self.test_link:
-                self.navigate_to_salesforce()
-        except Exception as e:
-            logging.error(f"❌ Error during BFV3 test: {e}")
+        """Run the BFV3 test."""
+        self.perform_bfv3_test()
+        if self.test_link:
+            self.navigate_to_salesforce()
 
     @allure.step("Perform BFV3 Test Logic")
     @allure.id(generate_test_uuid("perform_bfv3_test"))
@@ -52,6 +49,7 @@ class BFV3Test:
         with allure.step("✅ Performing configuration actions"):
             try:
                 configurator.perform_configurator_actions()
+                self.page.wait_for_timeout(1000)  # Wait for 2 seconds to ensure actions are completed
 
                 logging.info("✅ Successfully performed configuration actions.")
             except Exception as e:

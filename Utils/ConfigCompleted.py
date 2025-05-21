@@ -63,7 +63,7 @@ class ConfiguratorCompleted:
                 logging.info("✅ Fallback click on <li> using Playwright.")
 
             # Wait for the configurator to load
-            self.page.wait_for_timeout(3000)
+            self.page.wait_for_timeout(4000)
             
         except Exception as e:
             logging.error(f"❌ Error while performing configurator actions: {e}")

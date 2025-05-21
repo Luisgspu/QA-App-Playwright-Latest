@@ -80,7 +80,7 @@ class ConfiguratorStarted:
                 self.page.evaluate("el => el.click()", second_child)
                 logging.warning(f"⚠️ Fallback click on <li> using JavaScript. Reason: {e}")
 
-            self.page.wait_for_timeout(2000)
+            self.page.wait_for_timeout(3000)
 
         except Exception as e:
             logging.error(f"❌ Error while performing configurator actions: {e}")

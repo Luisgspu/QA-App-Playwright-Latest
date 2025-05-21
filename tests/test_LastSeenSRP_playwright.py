@@ -11,29 +11,18 @@ class LSeenSRPTest:
         self.page = page
         self.urls = urls
         self.test_link = test_link
-        self.retries = 0
-        self.max_retries = 5  # Maximum number of retries
 
     @allure.feature("Last Seen SRP")
     @allure.story("Run Last Seen SRP Test")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.id(generate_test_uuid("run_LSeenSRP_test"))
     def run(self):
-        test_success = False
-        while self.retries < self.max_retries:
-            try:
-                self.perform_LSSRP_test()
-                if self.test_link:
-                    self.navigate_to_salesforce()
-                test_success = True
-                break
-            except Exception as e:
-                logging.error(f"❌ Error during Last Seen SRP test: {e}")
-                self.retries += 1
-                continue
+        """Run the Last Seen SRP test."""
+        self.perform_LSSRP_test()
+        if self.test_link:
+            self.navigate_to_salesforce()
+         
 
-        if not test_success:
-            logging.error(f"❌ Last Seen SRP Test failed after {self.max_retries} attempts.")
 
     @allure.step("Perform Last Seen SRP Logic")
     @allure.id(generate_test_uuid("perform_LSSRP_test"))

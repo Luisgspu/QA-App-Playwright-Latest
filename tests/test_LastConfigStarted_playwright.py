@@ -18,13 +18,10 @@ class LCStartedTest:
     @allure.id(generate_test_uuid("run_LCStarted_test"))
     def run(self):
         """Executes the Last Configuration Started test."""
-        try:
-            self.perform_LCStarted_test()
-            if self.test_link:
-                self.navigate_to_salesforce()
-        except Exception as e:
-            logging.error(f"❌ Error during the Last Configuration Started test: {e}")
-            allure.attach(f"Error: {e}", name="Test Error", attachment_type=allure.attachment_type.TEXT)
+        self.perform_LCStarted_test()
+        if self.test_link:
+            self.navigate_to_salesforce()
+    
 
     @allure.step("Perform Last Configuration Started Test Logic")
     @allure.id(generate_test_uuid("LCCompleted_test"))

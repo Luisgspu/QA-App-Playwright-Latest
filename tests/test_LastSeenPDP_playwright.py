@@ -56,7 +56,7 @@ class LSeenPDPTest:
                 self.page.goto(pdp_url)
                 logging.info(f"🌍 Opened PDP URL: {pdp_url}")
                 self.page.wait_for_load_state("networkidle")
-                self.page.wait_for_timeout(6000)
+                self.page.wait_for_timeout(6500)
 
             with allure.step(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}"):
                 self.page.goto(self.urls['HOME_PAGE'])

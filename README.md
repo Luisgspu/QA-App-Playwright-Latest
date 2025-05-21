@@ -10,7 +10,7 @@ QA-App-Allure-Testing
 │   ├── workflows
 │      ├── main.yml
 │      ├── reset-allure-history.yml
-│      ├── scheduled.yml
+│      └── scheduled.yml
 ├── Utils
 │   ├── ScreenshotHandler.py
 │   ├── XHRResponseCapturer.py
@@ -42,7 +42,7 @@ QA-App-Allure-Testing
 │   ├── Last Seen SRP.json
 │   ├── Last Seen PDP.json
 │   ├── Last Configuration Started.json
-│   ├── Las Configuration Completed.json
+│   └── Las Configuration Completed.json
 ├── requirements.txt
 ├── QAAppAllure.py
 ├── pytest.ini
@@ -161,8 +161,6 @@ __pycache__/
 # Tests
 /Tests/*.png
 
-# Tests
-/Tests/*.png
 
 # Allure
 allure-results/

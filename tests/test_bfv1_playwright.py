@@ -8,8 +8,6 @@ class BFV1Test:
     def __init__(self, page: Page, urls, market_code=None, model_code=None, test_link=None):
         self.page = page
         self.urls = urls
-        self.market_code = market_code
-        self.model_code = model_code
         self.test_link = test_link
  
 

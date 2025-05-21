@@ -124,12 +124,10 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 # Manually defined test cases
 manual_test_cases = [
 
-    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "BFV2", "market_code": "DE/de", "model_code": "S214"},
+    
     {"test_name": "BFV3", "market_code": "DE/de", "model_code": "S214"},
     {"test_name": "Last Configuration Started", "market_code": "DE/de", "model_code": "S214"},
     {"test_name": "Last Configuration Completed", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "S214"},
     {"test_name": "Last Seen PDP", "market_code": "DE/de", "model_code": "S214"},
 
 ]

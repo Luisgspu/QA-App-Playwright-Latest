@@ -11,21 +11,18 @@ class LCCompletedTest:
         self.page = page  # Playwright Page
         self.urls = urls
         self.test_link = test_link
-        self.retries = 0
-        self.max_retries = 5
+        
 
     @allure.feature("Last Configuration Completed Test Suite")
     @allure.story("Run Last Configuration Completed Test")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.id(generate_test_uuid("run_LCCompleted_test"))
     def run(self):
-        try:
-            self.perform_LCCompleted_test()
-            if self.test_link:
-                self.navigate_to_salesforce()
-        except Exception as e:
-            logging.error(f"❌ Error during Last Configuration Completed test: {e}")
-            allure.attach(f"Error: {e}", name="Test Error", attachment_type=allure.attachment_type.TEXT)
+        """Run the Last Configuration Completed test."""
+        self.perform_LCCompleted_test()
+        if self.test_link:
+            self.navigate_to_salesforce()
+  
 
     @allure.step("Perform Last Configuration Completed Logic")
     @allure.id(generate_test_uuid("perform_LCCompleted_test"))

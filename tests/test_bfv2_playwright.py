@@ -19,13 +19,10 @@ class BFV2Test:
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.id(generate_test_uuid("run_bfv2_test"))
     def run(self):
-        try:
-            self.perform_bfv2_test()
-            if self.test_link:
-                self.navigate_to_salesforce()
-        except Exception as e:
-            logging.error(f"❌ Error during the BFV2 test: {e}")
-            allure.attach(f"Error: {e}", name="Test Error", attachment_type=allure.attachment_type.TEXT)
+        """Run the BFV2 test."""
+        self.perform_bfv2_test()
+        if self.test_link:
+            self.navigate_to_salesforce()
 
     @allure.step("Perform BFV2 Test Logic")
     @allure.id(generate_test_uuid("perform_bfv2_test"))
