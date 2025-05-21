@@ -28,18 +28,19 @@ class ScreenshotHandler:
                     logging.info("✅ Scrolled to [data-component-name='hp-campaigns'].")
                     page.screenshot(path=screenshot_path, full_page=False)
                     logging.info(f"📸 Screenshot taken and saved as {screenshot_path}")
-                    with allure.step("✅ Screenshot captured and saved"):
-                        try:
-                            with open(screenshot_path, "rb") as f:
-                                allure.attach(f.read(), name="Campaign Section Screenshot", attachment_type=allure.attachment_type.PNG)
-                        except Exception as e:
-                            logging.warning(f"Could not attach screenshot to Allure: {e}")
                 else:
                     logging.warning("⚠️ [data-component-name='hp-campaigns'] not found.")
                     allure.attach("⚠️ [data-component-name='hp-campaigns'] not found.", name="Scroll Info", attachment_type=allure.attachment_type.TEXT)
             except Exception as e:
                 logging.error(f"❌ Error while scrolling to [data-component-name='hp-campaigns']: {e}")
                 allure.attach(f"❌ Error: {e}", name="Scroll Error", attachment_type=allure.attachment_type.TEXT)
+                
+        with allure.step("✅ Screenshot captured and saved"):
+                        try:
+                            with open(screenshot_path, "rb") as f:
+                                allure.attach(f.read(), name="Campaign Section Screenshot", attachment_type=allure.attachment_type.PNG)
+                        except Exception as e:
+                            logging.warning(f"Could not attach screenshot to Allure: {e}")        
 
     def get_language_code(self, url: str) -> str:
         if "/fr" in url:

@@ -107,20 +107,35 @@ manual_test_cases = [
 
 ## Running Tests
 
-To run all tests:
+To run all tests in parallel with reruns and Allure reporting, use the following command:
+
 ```sh
-pytest
+pytest QAAppAllure.py -n 4 -s -v --reruns 4 --alluredir=allure-results
 ```
 
-To run a specific test file:
+- `-n 4` runs tests in parallel using 4 CPU cores. Adjust this number based on your machine's available cores.
+- `--reruns 4` will rerun any failed test up to 4 times.
+- `--alluredir=allure-results` saves the results for Allure reporting.
+- `-s` allows print/log output to be shown in the console.
+- `-v` enables verbose output.
+
+You can change the values for `-n` and `--reruns` depending on your hardware and reliability needs.
+
+---
+
+## Allure Reporting
+
+After running your tests, you can generate and view the Allure report locally with the following commands (for example, if Allure is installed at `C:\Allure\allure-2.33.0\bin`):
+
 ```sh
-pytest tests/test_bfv1_playwright.py
+C:\Allure\allure-2.33.0\bin\allure generate allure-results -o allure-report --clean
+C:\Allure\allure-2.33.0\bin\allure serve allure-results
 ```
 
-To generate an Allure report after running tests:
-```sh
-allure serve allure-results
-```
+- The first command generates a static HTML report in the `allure-report` folder.
+- The second command starts a local server to view the report in your browser.
+
+Make sure to adjust the path if your Allure installation is in a different location.
 
 ## .gitignore
 
