@@ -6,6 +6,11 @@ This project is designed for automated testing of web applications using [Playwr
 ## Project Structure
 ```
 QA-App-Allure-Testing
+├── .github
+│   ├── workflows
+│      ├── main.yml
+│      ├── reset-allure-history.yml
+│      ├── scheduled.yml
 ├── Utils
 │   ├── ScreenshotHandler.py
 │   ├── XHRResponseCapturer.py
