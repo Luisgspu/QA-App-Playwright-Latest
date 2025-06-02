@@ -100,8 +100,8 @@ def test_shadow_dom_click():
         page.wait_for_load_state("networkidle")
         logging.info(f"✅ PI Page loaded: {url}")
         
-        
-         # Open PI Page
+        """
+        # Open PI Page
         page.goto("https://www.mercedes-benz.de/passengercars/mercedes-benz-cars/car-configurator.html/motorization/CCci/DE/de/CLE-KLASSE/COUPE")
         page.wait_for_load_state("networkidle")
         logging.info(f"✅ Config Page loaded: {url}")
@@ -111,48 +111,59 @@ def test_shadow_dom_click():
         configurator = ConfiguratorCompleted(page)
         configurator.perform_configurator_actions()
                
-        
+        """
 
         # Go back to Home Page
         page.goto(url)
         page.wait_for_load_state("networkidle")
         logging.info(f"✅ Home Page loaded: {url}")
         
-        """
+        
         # Capture screenshot after scrolling to the main campaign element
         try:
             logging.info("🔍 Looking for [data-component-name='hp-campaigns'] element...")
-            element = page.locator("[data-component-name='hp-campaigns']")
-            element.wait_for(state="attached", timeout=5000)
-            count = element.count()
+            # Wait for at least one such element to appear (not strict)
+            page.wait_for_selector("[data-component-name='hp-campaigns']", timeout=5000)
+            elements = page.locator("[data-component-name='hp-campaigns']")
+            count = elements.count()
             logging.info(f"Found {count} [data-component-name='hp-campaigns'] elements.")
-            if count > 0:
-                element.first.scroll_into_view_if_needed()
+
+            # Use the first visible element
+            visible_element = None
+            for i in range(count):
+                el = elements.nth(i)
+                if el.is_visible():
+                    visible_element = el
+                    break
+
+            if visible_element:
+                visible_element.scroll_into_view_if_needed()
                 page.wait_for_timeout(2000)
-                logging.info("✅ Scrolled to [data-component-name='hp-campaigns'].")
+                logging.info("✅ Scrolled to first visible [data-component-name='hp-campaigns'].")
                 screenshot_path = "campaign_section.png"
-                page.screenshot(path=screenshot_path, full_page=False)
+                page.screenshot(path=screenshot_path)  # Use full_page=True for a larger screenshot
                 logging.info(f"📸 Screenshot taken and saved as {screenshot_path}")
             else:
-                logging.warning("⚠️ [data-component-name='hp-campaigns'] not found.")
+                logging.warning("⚠️ No visible [data-component-name='hp-campaigns'] found.")
         except Exception as e:
             logging.error(f"❌ Error while scrolling to [data-component-name='hp-campaigns']: {e}")
         """        
         """
         expected_src = "/content/dam/hq/personalization/campaignmodule/"
         
-        element = page.locator("[data-component-name='hp-campaigns']")
-        element.wait_for(state="attached", timeout=5000)
-        count = element.count()
+        page.wait_for_selector("[data-component-name='hp-campaigns']", timeout=5000)
+        elements = page.locator("[data-component-name='hp-campaigns']")
+        count = elements.count()
         logging.info(f"Found {count} [data-component-name='hp-campaigns'] elements.")
 
         if count > 0:
             # Busca todas las imágenes dentro del primer elemento encontrado
-            images = element.first.locator("img")
+            images = elements.first.locator("img")
             img_count = images.count()
             logging.info(f"Found {img_count} <img> elements inside [data-component-name='hp-campaigns'].")
 
             srcs = []
+            found_match = False  # <-- Initialize here
             for i in range(img_count):
                 src = images.nth(i).get_attribute("src")
                 srcs.append(src)
@@ -160,22 +171,13 @@ def test_shadow_dom_click():
                 logging.info(f"Image {i+1} src: {src}")
                 if src and expected_src in src:
                     found_match = True
-                    
+
             logging.info("All found image srcs:\n" + "\n".join([str(s) for s in srcs]))
             if found_match:
                 logging.info(f"✅ Personalized image applied correctly. Expected source found: {expected_src}")
             else:
-                logging.warning(f"❌ No image src contains the expected substring: {expected_src}")    
-
-            # Si quieres, también puedes adjuntar todos los srcs a un archivo o reporte aquí
-
-            element.first.scroll_into_view_if_needed()
-            page.wait_for_timeout(2000)
-            logging.info("✅ Scrolled to [data-component-name='hp-campaigns'].")
-        else:
-            logging.warning("⚠️ [data-component-name='hp-campaigns'] not found.")
+                logging.warning(f"❌ No image src contains the expected substring: {expected_src}") 
         
-        """
        
 
         # Capture XHR responses
@@ -198,11 +200,8 @@ def test_shadow_dom_click():
         expected_src = "/content/dam/hq/personalization/campaignmodule/"
         verifier = ImageVerifier(page)
         result = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src)
-        
-      
-            
-            
-
+    
+    
         browser.close()
         
 if __name__ == "__main__":

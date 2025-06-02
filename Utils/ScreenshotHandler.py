@@ -18,12 +18,12 @@ class ScreenshotHandler:
         with allure.step("📜 Scrolling to [data-component-name='hp-campaigns'] and capturing screenshot"):
             try:
                 logging.info("🔍 Looking for [data-component-name='hp-campaigns'] element...")
-                element = page.locator("[data-component-name='hp-campaigns']")
-                element.wait_for(state="attached", timeout=5000)
-                count = element.count()
+                page.wait_for_selector("[data-component-name='hp-campaigns']", timeout=5000)
+                elements = page.locator("[data-component-name='hp-campaigns']")
+                count = elements.count()
                 logging.info(f"Found {count} [data-component-name='hp-campaigns'] elements.")
                 if count > 0:
-                    element.first.scroll_into_view_if_needed()
+                    elements.first.scroll_into_view_if_needed()
                     page.wait_for_timeout(2000)
                     logging.info("✅ Scrolled to [data-component-name='hp-campaigns'].")
                     page.screenshot(path=screenshot_path, full_page=False)

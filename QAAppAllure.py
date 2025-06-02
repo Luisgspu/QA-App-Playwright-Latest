@@ -125,10 +125,10 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 manual_test_cases = [
 
     
-    {"test_name": "BFV3", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "Last Configuration Started", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "Last Configuration Completed", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "Last Seen PDP", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "BFV1", "market_code": "SK/sk", "model_code": "S214"},
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},
+
+
 
 ]
 
@@ -207,7 +207,7 @@ def test_run(test_case, screenshot_dir):
                 "--incognito",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
-                "--window-size=1920,1080",
+                "--window-size=2560,1440",
                 "--disable-blink-features=AutomationControlled",
                 "--disable-infobars",
                 "--disable-extensions",
@@ -217,8 +217,8 @@ def test_run(test_case, screenshot_dir):
             ]
         )
         context = browser.new_context(
-            viewport={"width": 1920, "height": 1080},
-            screen={"width": 1920, "height": 1080}
+            viewport={"width": 2560, "height": 1440},
+            screen={"width": 2560, "height": 1440}
         )
         page = context.new_page()
 
