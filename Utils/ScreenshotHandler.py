@@ -3,8 +3,10 @@ import allure
 from playwright.sync_api import Page
 import logging
 import allure
+import pytest
 
 class ScreenshotHandler:
+    
     def __init__(self, page: Page, screenshot_dir: str):
         self.page = page
         self.screenshot_dir = screenshot_dir
@@ -30,9 +32,11 @@ class ScreenshotHandler:
                     logging.info(f"📸 Screenshot taken and saved as {screenshot_path}")
                 else:
                     logging.warning("⚠️ [data-component-name='hp-campaigns'] not found.")
+                    pytest.fail("⚠️ [data-component-name='hp-campaigns'] not found.")
                     allure.attach("⚠️ [data-component-name='hp-campaigns'] not found.", name="Scroll Info", attachment_type=allure.attachment_type.TEXT)
             except Exception as e:
                 logging.error(f"❌ Error while scrolling to [data-component-name='hp-campaigns']: {e}")
+                pytest.fail(f"❌ Error while scrolling to [data-component-name='hp-campaigns']: {e}")
                 allure.attach(f"❌ Error: {e}", name="Scroll Error", attachment_type=allure.attachment_type.TEXT)
                 
         with allure.step("✅ Screenshot captured and saved"):

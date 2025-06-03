@@ -127,6 +127,9 @@ manual_test_cases = [
     
     {"test_name": "BFV1", "market_code": "SK/sk", "model_code": "S214"},
     {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},
+    {"test_name": "BFV1", "market_code": "GB/en", "model_code": "S214"},
+
+    
 
 
 
