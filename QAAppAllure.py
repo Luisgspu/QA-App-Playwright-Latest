@@ -72,14 +72,21 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
             allure.dynamic.description(message)
             pytest.skip(message)
 
-    try:
-        with allure.step(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']}"):
-            page.goto(urls['HOME_PAGE'])
-            page.wait_for_load_state("networkidle")
-            logging.info(f"🌍 Navigated to: {urls['HOME_PAGE']}")
-    except Exception as e:
-        logging.error(f"❌ Error navigating to HOME_PAGE: {e}")
-        pytest.fail(f"Error navigating to HOME_PAGE: {e}")
+    max_retries = 2
+    for attempt in range(max_retries):
+        try:
+            with allure.step(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']} (Attempt {attempt+1})"):
+                page.goto(urls['HOME_PAGE'], timeout=60000)
+                page.wait_for_load_state("networkidle", timeout=60000)
+                logging.info(f"🌍 Navigated to: {urls['HOME_PAGE']}")
+            break
+        except Exception as e:
+            logging.warning(f"⚠️ Navigation attempt {attempt+1} failed: {e}")
+            if attempt == max_retries - 1:
+                logging.error(f"❌ Error navigating to HOME_PAGE after {max_retries} attempts: {e}")
+                pytest.fail(f"Error navigating to HOME_PAGE: {e}")
+            else:
+                page.reload()
 
     # Accpet cookies if necessary
     cookie_handler = CookieHandler(page)
@@ -125,11 +132,12 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 manual_test_cases = [
 
     
-    {"test_name": "BFV1", "market_code": "SK/sk", "model_code": "S214"},
-    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "S214"},
-    {"test_name": "BFV1", "market_code": "GB/en", "model_code": "S214"},
 
-    
+    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "N465"},
+        {"test_name": "Last Seen PDP", "market_code": "DE/de", "model_code": "N465"},
+
+
+
 
 
 
@@ -171,8 +179,8 @@ CAMPAIGN_FILTERS = {
     "BFV3": "best-fitting-vehicle",
     "Last Configuration Started": "last-configuration",
     "Last Configuration Completed": "last-configuration",
-    "Last Seen SRP": "dcp-last-seen-srp",
-    "Last Seen PDP": "dcp-last-seen-pdp",
+    "Last Seen SRP": "dcp-last-seen-pdp-srp",
+    "Last Seen PDP": "dcp-last-seen-pdp-srp",
     
     # Add more as needed
 }

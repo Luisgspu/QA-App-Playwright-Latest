@@ -21,31 +21,35 @@ def verify_personalization_and_capture(
                 if xhr_data:
                     import json
                     allure.attach(json.dumps(xhr_data, indent=2, ensure_ascii=False), name="XHR Responses", attachment_type=allure.attachment_type.JSON)
+                    # Iterate over all campaigns in all responses and log the full campaign response
+                    for response in xhr_data:
+                        campaigns = response.get("body", {}).get("campaignResponses", [])
+                        for campaign in campaigns:
+                            campaign_name = campaign.get("campaignName", "Unknown Campaign")
+                            user_group = campaign.get("userGroup", "Unknown UserGroup")
+                            experience_name = campaign.get("experienceName", "Unknown Experience")
+
+                            # Log the full campaign response
+                            logging.info(f"Full campaign response: {json.dumps(campaign, indent=2, ensure_ascii=False)}")
+
+                            if "Control Group" in experience_name or user_group.lower() == "control":
+                                with allure.step(f"❌ Campaign '{campaign_name}' is in the Control Group. Retrying test."):
+                                    message = f"❌ Test '{test_name}' failed because the campaign was identified as part of the Control Group."
+                                    allure.dynamic.label("defect", "Control Group Fail")
+                                    allure.dynamic.tag("Control Group Issue")
+                                    pytest.fail(message)
+                                    return False
+                            else:
+                                with allure.step(f"✅ Campaign '{campaign_name}' has userGroup: {user_group} and experienceName: {experience_name}."):
+                                    logging.info(f"✅ Campaign '{campaign_name}' has userGroup: {user_group} and experienceName: {experience_name}.")
                 else:
-                    allure.attach("No XHR data captured.", name="XHR Responses", attachment_type=allure.attachment_type.TEXT)
-                    logging.info(f"ℹ️ Captured XHR data: {xhr_data}")
-
-                # Iterate over all campaigns in all responses and log the full campaign response
-                for response in xhr_data:
-                    campaigns = response.get("body", {}).get("campaignResponses", [])
-                    for campaign in campaigns:
-                        campaign_name = campaign.get("campaignName", "Unknown Campaign")
-                        user_group = campaign.get("userGroup", "Unknown UserGroup")
-                        experience_name = campaign.get("experienceName", "Unknown Experience")
-
-                        # Log the full campaign response
-                        logging.info(f"Full campaign response: {json.dumps(campaign, indent=2, ensure_ascii=False)}")
-
-                        if "Control Group" in experience_name or user_group.lower() == "control":
-                            with allure.step(f"❌ Campaign '{campaign_name}' is in the Control Group. Retrying test."):
-                                message = f"❌ Test '{test_name}' failed because the campaign was identified as part of the Control Group."
-                                allure.dynamic.label("defect", "Control Group Fail")
-                                allure.dynamic.tag("Control Group Issue")
-                                pytest.fail(message)
-                                return False
-                        else:
-                            with allure.step(f"✅ Campaign '{campaign_name}' has userGroup: {user_group} and experienceName: {experience_name}."):
-                                logging.info(f"✅ Campaign '{campaign_name}' has userGroup: {user_group} and experienceName: {experience_name}.")
+                    message = (
+                        f"❌ No XHR campaign data was captured for test '{test_name}'.\n"
+                        f"Expected campaign substring: '{xhr_capturer.TARGET_CAMPAIGN_NAME_SUBSTRING}'"
+                    )
+                    allure.attach(message, name="No XHR Data", attachment_type=allure.attachment_type.TEXT)
+                    logging.error(message)
+                    return False
             except Exception as e:
                 logging.error(f"❌ Failed to check userGroup in XHR responses: {e}")
                 allure.attach(f"❌ Failed to check userGroup in XHR responses: {e}", name="XHR Error", attachment_type=allure.attachment_type.TEXT)
