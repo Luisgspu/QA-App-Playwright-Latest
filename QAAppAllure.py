@@ -71,24 +71,17 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
             message = f"❌ Skipping test '{test_name}' due to lack of TEST_DRIVE URL."
             allure.dynamic.description(message)
             pytest.skip(message)
+    
+    try:
+        with allure.step(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']}"):
+            page.goto(urls['HOME_PAGE'])
+            page.wait_for_load_state("domcontentloaded")
+            logging.info(f"🌍 Navigated to: {urls['HOME_PAGE']}")
+    except Exception as e:
+        logging.error(f"❌ Error navigating to HOME_PAGE: {e}")
+        pytest.fail(f"Error navigating to HOME_PAGE: {e}")
 
-    max_retries = 2
-    for attempt in range(max_retries):
-        try:
-            with allure.step(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']} (Attempt {attempt+1})"):
-                page.goto(urls['HOME_PAGE'], timeout=60000)
-                page.wait_for_load_state("networkidle", timeout=60000)
-                logging.info(f"🌍 Navigated to: {urls['HOME_PAGE']}")
-            break
-        except Exception as e:
-            logging.warning(f"⚠️ Navigation attempt {attempt+1} failed: {e}")
-            if attempt == max_retries - 1:
-                logging.error(f"❌ Error navigating to HOME_PAGE after {max_retries} attempts: {e}")
-                pytest.fail(f"Error navigating to HOME_PAGE: {e}")
-            else:
-                page.reload()
-
-    # Accpet cookies if necessary
+    # Accept cookies if necessary
     cookie_handler = CookieHandler(page)
     cookie_handler.accept_cookies()
 
@@ -132,14 +125,12 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
 manual_test_cases = [
 
     
+    
+        {"test_name": "Last Configuration Completed", "market_code": "DE/de", "model_code": "H243-fl"},
 
-    {"test_name": "Last Seen SRP", "market_code": "DE/de", "model_code": "N465"},
-        {"test_name": "Last Seen PDP", "market_code": "DE/de", "model_code": "N465"},
-
-
-
-
-
+        
+       
+        
 
 ]
 
@@ -210,7 +201,7 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=True,  # or False for headed
+            headless=False,  # or False for headed
             args=[
                 "--start-maximized",
                 "--disable-gpu",
@@ -231,8 +222,8 @@ def test_run(test_case, screenshot_dir):
             viewport={"width": 2560, "height": 1440},
             screen={"width": 2560, "height": 1440}
         )
+        
         page = context.new_page()
-
         # Use the mapping to get the correct substring for filtering
         substring = CAMPAIGN_FILTERS.get(test_name, "")
         xhr_capturer = XHRResponseCapturer(

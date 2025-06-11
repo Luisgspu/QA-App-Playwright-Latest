@@ -7,6 +7,8 @@ from XHRResponseCapturer import XHRResponseCapturer  # Assuming this is the corr
 import json
 from ConfigStarted import ConfiguratorStarted  # Playwright version
 from ConfigCompleted import ConfiguratorCompleted  # Playwright version
+from playwright.sync_api import Page, expect, TimeoutError
+from CookiesHandler import CookieHandler  # Assuming this is in another file
 
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -43,80 +45,39 @@ def test_shadow_dom_click():
         # Open a Home Page
         page = context.new_page()
         page.goto(url)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         logging.info(f"✅ Home Page loaded: {url}")
         
-        shadow_host_selector = "cmm-cookie-banner"
-        button_selector = "wb7-button.button--accept-all"
-
-        logging.info(f"🔍 Waiting for shadow host: {shadow_host_selector}")
-        try:
-            page.wait_for_selector(shadow_host_selector, timeout=10000, state="attached")
-            page.wait_for_timeout(2000)  # Wait for 2 seconds to ensure the shadow DOM is ready
-            is_hidden = page.locator(shadow_host_selector).evaluate(
-                "banner => window.getComputedStyle(banner).display === 'none' || window.getComputedStyle(banner).visibility === 'hidden'"
-            )
-            logging.info(f"Banner hidden: {is_hidden}")
-
-            logging.info("✅ Shadow host found.")
-        except Exception as ex:
-            logging.error(f"❌ Shadow host not found: {ex}")
-            browser.close()
-            return
-
-        logging.info("🔍 Trying to expand shadow root and find the button...")
-        # Print all elements in the shadow root for debugging
-        buttons = page.locator(shadow_host_selector).evaluate(
-             "banner => Array.from(banner.shadowRoot.querySelectorAll('button, wb7-button')).map(e => e.outerHTML)"
-        )
-
-        # Try to click any button with 'accept' in text
-        found = page.locator(shadow_host_selector).evaluate(
-            """
-            banner => {
-                const btn = banner.shadowRoot.querySelector('[data-test="handle-accept-all-button"]');
-                if (btn) {
-                    btn.click();
-                    return true;
-                }
-                return false;
-            }
-            """
-        )
-        if found:
-            logging.info("✅ Accept button inside shadow root found and clicked.")
-        else:
-            logging.warning("⚠️ Accept button inside shadow root not found.")
+        # Accept cookies if necessary
+        cookie_handler = CookieHandler(page)
+        cookie_handler.accept_cookies()
         
-        page.goto("https://www.mercedes-benz.de/passengercars/buy/new-car/product.html/EQS-450-4MATIC-SUV_0-20133945_DE_354ae2f5")
-        page.wait_for_load_state("networkidle")
-
+        page.goto("https://www.mercedes-benz.de/passengercars/models/suv/eqa/overview.html")
+        page.wait_for_load_state("domcontentloaded")
+        
+        
+        
+        """        
         # Try to find the specific button selector
         button_selector = "#emh-pdp > div > div > div.product-stage > div.product-stage__bottom > div > div > div > div:nth-child(3) > div > button"
-        logging.info(f"🔍 Trying to find PDP CTA button: {button_selector}")
+        logging.info(f"🔍 Asserting PDP CTA button is enabled: {button_selector}")
+
         try:
-            # Wait until the button is attached and visible
-            page.wait_for_selector(button_selector, timeout=10000, state="visible")
-            cta_button = page.locator(button_selector).first
-
-            # Wait until the button is enabled (not disabled)
-            for _ in range(20):  # Try for up to 2 seconds (20 x 100ms)
-                if cta_button.is_enabled():
-                    break
-                page.wait_for_timeout(100)
-            else:
-                logging.warning("⚠️ PDP CTA button is visible but not enabled after waiting.")
-
-            if cta_button.is_visible() and cta_button.is_enabled():
-                logging.info("✅ PDP CTA button found, visible, and enabled (clickable).")
-            else:
-                logging.warning("⚠️ PDP CTA button found but is not clickable.")
+            button_locator = page.locator(button_selector)
+            # This will auto-retry until the element is enabled or the timeout is reached.
+            expect(button_locator).to_be_enabled(timeout=10000)
+            logging.info("✅ PDP CTA button is enabled as expected.")
+        except TimeoutError:
+            logging.error(f"❌ PDP CTA button did not become enabled within 10 seconds (TimeoutError). Selector: {button_selector}")
         except Exception as e:
-            logging.error(f"❌ PDP CTA button not found or not clickable: {e}")
-        
-         # Go back to Home Page
+            logging.error(f"❌ An unexpected error occurred during assertion for PDP CTA button: {e}")
+                
+        """        
+     
+        # Go back to Home Page
         page.goto(url)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
+        page.wait_for_timeout(2000)  # Wait for 2 seconds to ensure the page is fully loaded
         logging.info(f"✅ Home Page loaded: {url}")
         
         

@@ -32,14 +32,16 @@ class BFV2Test:
         # Navigate to the product page
         with allure.step(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}"):
             self.page.goto(self.urls['PRODUCT_PAGE'])
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(1000)
             logging.info(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}")
-            self.page.wait_for_load_state("networkidle")
 
         # Navigate to the configurator
         with allure.step(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}"):
             self.page.goto(self.urls['CONFIGURATOR'])
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(4000)  # Wait for 2 seconds to ensure the page is fully loaded
             logging.info(f"🌍 Navigating to: {self.urls['CONFIGURATOR']}")
-            self.page.wait_for_load_state("networkidle")
             
 
         # Call the perform_configurator_actions function from ConfiguratorStarted
@@ -47,6 +49,7 @@ class BFV2Test:
             try:
                 configurator.perform_configurator_actions()
                 logging.info("✅ Successfully performed configuration actions.")
+                self.page.wait_for_timeout(1000) 
             except Exception as e:
                 logging.error(f"❌ Error performing configuration actions: {e}")
                 allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
@@ -55,8 +58,9 @@ class BFV2Test:
         # Navigate back to the home page
         with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
             self.page.goto(self.urls['HOME_PAGE'])
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(2000) 
             logging.info(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}")
-            self.page.wait_for_load_state("load")
 
     @allure.step("Navigate to Salesforce URL")
     @allure.id(generate_test_uuid("navigate_to_salesforce"))

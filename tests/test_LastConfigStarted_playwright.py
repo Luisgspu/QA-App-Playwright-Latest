@@ -31,14 +31,16 @@ class LCStartedTest:
             # Navigate to the configurator and perform actions
             with allure.step(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}"):
                 self.page.goto(self.urls['CONFIGURATOR'])
+                self.page.wait_for_load_state("domcontentloaded")
+                self.page.wait_for_timeout(4000)  # Wait for 2 seconds to ensure the page is fully loaded
                 logging.info(f"🌍 Navigated to the configurator: {self.urls['CONFIGURATOR']}")
-                self.page.wait_for_load_state("networkidle")
 
             # Call the perform_configurator_actions function from ConfiguratorStarted
             with allure.step("✅ Performing configuration actions"):
                 try:
                     configurator.perform_configurator_actions()
                     logging.info("✅ Successfully performed configuration actions.")
+                    self.page.wait_for_timeout(1000)  # Wait for 1 second to ensure actions are completed
                 except Exception as e:
                     logging.error(f"❌ Error performing configuration actions: {e}")
                     allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
@@ -48,7 +50,8 @@ class LCStartedTest:
             with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
                 self.page.goto(self.urls['HOME_PAGE'])
                 logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
-                self.page.wait_for_load_state("networkidle")
+                self.page.wait_for_load_state("domcontentloaded")
+                self.page.wait_for_timeout(2000)  # Wait for 2 seconds to ensure the page is fully loaded
 
         except Exception as e:
             logging.error(f"❌ Error in configurator: {e}")

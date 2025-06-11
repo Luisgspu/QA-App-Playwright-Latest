@@ -33,13 +33,15 @@ class LCCompletedTest:
             # Navigate to CONFIGURATOR
             with allure.step(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}"):
                 self.page.goto(self.urls['CONFIGURATOR'])
+                self.page.wait_for_load_state("domcontentloaded")
+                self.page.wait_for_timeout(4000)  # Wait for 2 seconds to ensure the page is fully loaded
                 logging.info(f"🌍 Navigated to: {self.urls['CONFIGURATOR']}")
-                self.page.wait_for_load_state("networkidle")
 
             # Execute actions in CONFIGURATOR
             with allure.step("✅ Performing configuration actions"):
                 try:
                     configurator.perform_configurator_actions()
+                    self.page.wait_for_timeout(2000)  # Wait for 2 seconds to ensure actions are completed
                     logging.info("✅ Successfully performed configuration actions.")
                 except Exception as e:
                     logging.error(f"❌ Error performing configuration actions: {e}")
@@ -51,8 +53,9 @@ class LCCompletedTest:
         # Navigate back to the home page
         with allure.step(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}"):
             self.page.goto(self.urls['HOME_PAGE'])
+            self.page.wait_for_load_state("domcontentloaded")
+            self.page.wait_for_timeout(2000)  # Wait for 2 seconds to ensure the page is fully loaded
             logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
-            self.page.wait_for_load_state("networkidle")
 
     @allure.step("Navigate to Salesforce URL")
     @allure.id(generate_test_uuid("navigate_to_salesforce"))
