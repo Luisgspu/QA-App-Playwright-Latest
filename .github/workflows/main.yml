@@ -37,6 +37,9 @@ jobs:
         # This command will list all files and directories inside /app
         # within your qa-app-allure image. Look for 'Tests/__init__.py'
 
+      - name: Ensure Allure results directory exists
+        run: mkdir -p report/allure-results
+        
       - name: Run tests in Docker container
         run: |
           docker run --rm -v ${{ github.workspace }}/report/allure-results:/app/report/allure-results qa-app-allure
