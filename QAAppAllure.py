@@ -201,7 +201,7 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,  # or False for headed
+            headless=True,  # or False for headed
             args=[
                 "--start-maximized",
                 "--disable-gpu",
