@@ -17,5 +17,8 @@ RUN pip install playwright && playwright install --with-deps
 # Copy the rest of your code
 COPY . .
 
+# Set environment variables
+ENV PYTHONPATH=/app
+
 # Default command (can be overridden)
 CMD ["pytest", "QAAppAllure.py", "-n", "4", "-s", "-v", "--reruns", "4", "--alluredir=allure-results"]
