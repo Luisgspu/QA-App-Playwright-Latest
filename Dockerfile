@@ -8,7 +8,8 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --default-timeout=100 -r requirements.txt
 
 # Install Playwright browsers
 RUN pip install playwright && playwright install --with-deps

@@ -28,26 +28,33 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Install Poetry and dependencies
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          poetry add pytest-rerunfailures
-          poetry install --no-root
+      - name: Build Docker image
+        run: docker build -t qa-app-allure .
 
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/App" >> $GITHUB_ENV
+      - name: Run tests in Docker container
+        run: |
+          docker run --rm -v ${{ github.workspace }}/report/allure-results:/app/report/allure-results qa-app-allure
+
+      #- name: Install Poetry and dependencies
+      #  run: |
+      #    curl -sSL https://install.python-poetry.org | python3 -
+      #    echo "$HOME/.local/bin" >> $GITHUB_PATH
+      #    poetry add pytest-rerunfailures
+      #    poetry install --no-root
+
+      #- name: Set PYTHONPATH
+      #  run: echo "PYTHONPATH=$(pwd)/App" >> $GITHUB_ENV
 
       # Add this step to fetch and log the public IP address
-      - name: Get Public IP Address
-        run: |
-          echo "Fetching public IP address..."
-          curl -s https://ifconfig.me > public_ip.txt
-          echo "Public IP Address: $(cat public_ip.txt)"      
+      #- name: Get Public IP Address
+      #  run: |
+      #    echo "Fetching public IP address..."
+      #    curl -s https://ifconfig.me > public_ip.txt
+      #    echo "Public IP Address: $(cat public_ip.txt)"      
 
-      - name: Run tests scripts directly
-        run: |
-          poetry run pytest QAAppAllure.py -n auto -s -v --reruns 4 --alluredir=report/allure-results
+      #- name: Run tests scripts directly
+      #  run: |
+      #    poetry run pytest QAAppAllure.py -n auto -s -v --reruns 4 --alluredir=report/allure-results
 
       - name: Checkout gh-pages
         uses: actions/checkout@v3
