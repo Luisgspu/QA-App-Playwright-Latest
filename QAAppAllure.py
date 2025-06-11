@@ -14,13 +14,13 @@ from Utils.VerifyPersonalizationAndCapture import verify_personalization_and_cap
 from Utils.CreateAPIandXHR import create_api_and_xhr
 from Utils.CookiesHandler import CookieHandler
 from Utils.XHRResponseCapturer import XHRResponseCapturer
-from Tests import test_bfv1_playwright
-from Tests import test_bfv2_playwright
-from Tests import test_bfv3_playwright
-from Tests import test_LastConfigStarted_playwright
-from Tests import test_LastConfigCompleted_playwright
-from Tests import test_LastSeenSRP_playwright
-from Tests import test_LastSeenPDP_playwright
+from tests import test_bfv1_playwright
+from tests import test_bfv2_playwright
+from tests import test_bfv3_playwright
+from tests import test_LastConfigStarted_playwright
+from tests import test_LastConfigCompleted_playwright
+from tests import test_LastSeenSRP_playwright
+from tests import test_LastSeenPDP_playwright
 
 
 # Test mapping
