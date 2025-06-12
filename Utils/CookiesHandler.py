@@ -15,7 +15,7 @@ class CookieHandler:
         shadow_host_selector = "cmm-cookie-banner"
         try:
             self.page.wait_for_selector(shadow_host_selector, timeout=10000, state="attached")
-            self.page.wait_for_timeout(2500)  # Wait for 2 seconds to ensure the shadow DOM is ready
+            self.page.wait_for_timeout(3000)  # Wait for 2 seconds to ensure the shadow DOM is ready
             logging.info("✅ Cookie banner detected (attached).")
             # Optional: log if hidden
             is_hidden = self.page.locator(shadow_host_selector).evaluate(
