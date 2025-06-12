@@ -1,7 +1,8 @@
 import logging
 import allure
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Page, TimeoutError
+import time
 
 class CookieHandler:
     """Handles cookie banners across different websites using Playwright."""
@@ -49,5 +50,12 @@ class CookieHandler:
                 raise Exception("Accept button not found in cookie banner shadow DOM.")
         except Exception as ex:
             allure.attach("❌ Cookie banner not found or already accepted.", name="Cookie Acceptance Error", attachment_type=allure.attachment_type.TEXT)
+            error_screenshot = f"cookie_error_{int(time.time())}.png"
+            try:
+                self.page.screenshot(path=error_screenshot, full_page=True)
+                allure.attach.file(error_screenshot, name="Cookie Error Screenshot", attachment_type=allure.attachment_type.PNG)
+            except Exception as screenshot_ex:
+                logging.error(f"❌ Failed to take screenshot: {screenshot_ex}")
+                allure.attach(f"Failed to take screenshot: {screenshot_ex}", name="Screenshot Error", attachment_type=allure.attachment_type.TEXT)
             logging.error(f"❌ Failed to accept cookies: {ex}")
             pytest.fail("Failed to accept cookies.")
