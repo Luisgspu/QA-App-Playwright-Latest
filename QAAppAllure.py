@@ -223,6 +223,9 @@ def test_run(test_case, screenshot_dir):
         )
         
         page = context.new_page()
+        page.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        """)
         # Use the mapping to get the correct substring for filtering
         substring = CAMPAIGN_FILTERS.get(test_name, "")
         xhr_capturer = XHRResponseCapturer(
