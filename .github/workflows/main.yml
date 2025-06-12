@@ -43,9 +43,17 @@ jobs:
       - name: Run tests in Docker container
         run: |
           docker run --rm -v ${{ github.workspace }}/report/allure-results:/app/report/allure-results qa-app-allure
+
+      - name: Fix permissions for Allure results
+        run: sudo chmod -R 777 report/allure-results
+
+      - name: List Allure results in container
+        run: docker run --rm -v ${{ github.workspace }}/report/allure-results:/app/report/allure-results qa-app-allure ls -l /app/report/allure-results
       
       - name: List Allure results on host
         run: ls -l report/allure-results
+
+
       #- name: Install Poetry and dependencies
       #  run: |
       #    curl -sSL https://install.python-poetry.org | python3 -

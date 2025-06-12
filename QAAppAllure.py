@@ -126,7 +126,7 @@ manual_test_cases = [
 
     
     
-    {"test_name": "Last Configuration Started", "market_code": "DE/de", "model_code": "H243-fl"},
+    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "H243-fl"},
 
         
         
