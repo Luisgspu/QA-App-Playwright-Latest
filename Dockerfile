@@ -21,4 +21,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Default command (can be overridden)
-CMD ["pytest", "QAAppAllure.py", "-n", "auto", "-s", "-v", "--reruns", "4", "--alluredir=allure-results"]
+CMD ["pytest", "QAAppAllure.py", "-n", "auto", "-s", "-v", "--reruns", "4", "--alluredir=report/allure-results"]
