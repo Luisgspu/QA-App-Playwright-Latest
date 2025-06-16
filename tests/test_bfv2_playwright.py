@@ -59,7 +59,7 @@ class BFV2Test:
         with allure.step(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}"):
             self.page.goto(self.urls['HOME_PAGE'])
             self.page.wait_for_load_state("domcontentloaded")
-            self.page.wait_for_timeout(2000) 
+            self.page.wait_for_timeout(3000) 
             logging.info(f"🌍 Navigating back to: {self.urls['HOME_PAGE']}")
 
     @allure.step("Navigate to Salesforce URL")

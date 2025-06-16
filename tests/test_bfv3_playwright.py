@@ -64,7 +64,7 @@ class BFV3Test:
             self.page.goto(self.urls['HOME_PAGE'])
             logging.info(f"🌍 Navigated back to: {self.urls['HOME_PAGE']}")
             self.page.wait_for_load_state("domcontentloaded")
-            self.page.wait_for_timeout(2000)
+            self.page.wait_for_timeout(3000)
 
     @allure.step("Navigate to Salesforce URL")
     @allure.id(generate_test_uuid("navigate_to_salesforce"))
