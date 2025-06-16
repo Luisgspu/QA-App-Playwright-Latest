@@ -25,7 +25,7 @@ class ScreenshotHandler:
                 count = elements.count()
                 logging.info(f"Found {count} [data-component-name='hp-campaigns'] elements.")
                 if count > 0:
-                    elements.first.scroll_into_view_if_needed()
+                    elements.first.evaluate("el => el.scrollIntoView({block: 'start'})")
                     page.wait_for_timeout(2000)
                     logging.info("✅ Scrolled to [data-component-name='hp-campaigns'].")
                     page.screenshot(path=screenshot_path, full_page=False)

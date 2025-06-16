@@ -126,7 +126,7 @@ manual_test_cases = [
 
     
     
-    {"test_name": "BFV1", "market_code": "DE/de", "model_code": "H243-fl"},
+    {"test_name": "BFV2", "market_code": "IT/it", "model_code": "A236"},
 
         
         
@@ -208,7 +208,7 @@ def test_run(test_case, screenshot_dir):
                 "--incognito",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
-                "--window-size=2560,1440",
+                "--window-size=3000,1688",
                 "--disable-blink-features=AutomationControlled",
                 "--disable-infobars",
                 "--disable-extensions",
@@ -218,14 +218,15 @@ def test_run(test_case, screenshot_dir):
             ]
         )
         context = browser.new_context(
-            viewport={"width": 2560, "height": 1440},
-            screen={"width": 2560, "height": 1440}
+            viewport={"width": 3000, "height": 1688},
+            screen={"width": 3000, "height": 1688}
         )
         
         page = context.new_page()
         page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
         """)
+    
         # Use the mapping to get the correct substring for filtering
         substring = CAMPAIGN_FILTERS.get(test_name, "")
         xhr_capturer = XHRResponseCapturer(

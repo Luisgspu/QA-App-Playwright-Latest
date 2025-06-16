@@ -99,7 +99,7 @@ def test_shadow_dom_click():
                     break
 
             if visible_element:
-                visible_element.scroll_into_view_if_needed()
+                visible_element.evaluate("el => el.scrollIntoView({block: 'start'})")
                 page.wait_for_timeout(2000)
                 logging.info("✅ Scrolled to first visible [data-component-name='hp-campaigns'].")
                 screenshot_path = "campaign_section.png"

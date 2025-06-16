@@ -49,7 +49,7 @@ class BFV2Test:
             try:
                 configurator.perform_configurator_actions()
                 logging.info("✅ Successfully performed configuration actions.")
-                self.page.wait_for_timeout(1000) 
+                self.page.wait_for_timeout(2000) 
             except Exception as e:
                 logging.error(f"❌ Error performing configuration actions: {e}")
                 allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)
