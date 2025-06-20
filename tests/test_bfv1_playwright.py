@@ -27,7 +27,7 @@ class BFV1Test:
         with allure.step(f"🌍 Navigating to: {self.urls['PRODUCT_PAGE']}"):
             self.page.goto(self.urls['PRODUCT_PAGE'])
             self.page.wait_for_load_state("domcontentloaded")
-            self.page.wait_for_timeout(1000)
+            self.page.wait_for_timeout(2000)
             logging.info(f"🌍 Navigated to: {self.urls['PRODUCT_PAGE']}")
             
             
