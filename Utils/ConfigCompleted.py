@@ -10,6 +10,7 @@ class ConfiguratorCompleted:
         """Initializes the Configurator with a Playwright Page instance."""
         self.page = page
 
+    
     def perform_configurator_actions(self):
         """Performs navigation and clicks inside the car configurator menu using Playwright."""
         try:
@@ -46,15 +47,14 @@ class ConfiguratorCompleted:
             
             # Define the main frame selector *inside* the shadow root
             main_frame_selector_in_shadow = (
-                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > '
-                'div.cc-app-container__navigation.ng-star-inserted > cc-navigation > nav > div > ul'
+                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul'
             )
 
             # 2. Wait for the main_frame element *inside* the shadow root to be visible.
             # This directly addresses the 'NoneType' error by ensuring the element exists
             # within the shadow DOM before attempting to hover.
             logging.info(f"🔍 Waiting for main frame (UL) inside shadow root: {main_frame_selector_in_shadow}")
-            main_frame_element = shadow_root_element.wait_for_selector(main_frame_selector_in_shadow, timeout=10000, state="visible")
+            main_frame_element = shadow_root_element.wait_for_selector(main_frame_selector_in_shadow, timeout=15000, state="visible")
             if not main_frame_element: # This check should technically be redundant if wait_for_selector throws on timeout
                 raise Exception(f"Main frame (UL) not found inside shadow root: {main_frame_selector_in_shadow}")
 
@@ -64,11 +64,10 @@ class ConfiguratorCompleted:
             
             # Find the last <li> in the nav, also *inside* the shadow root
             last_child_selector_in_shadow = (
-                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > '
-                'div.cc-app-container__navigation.ng-star-inserted > cc-navigation > nav > div > ul > li:last-child'
+                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul > li:last-child'
             )
             logging.info(f"🔍 Waiting for last child (LI) inside shadow root: {last_child_selector_in_shadow}")
-            last_child_element = shadow_root_element.wait_for_selector(last_child_selector_in_shadow, timeout=10000, state="visible")
+            last_child_element = shadow_root_element.wait_for_selector(last_child_selector_in_shadow, timeout=15000, state="visible")
             if not last_child_element:
                 raise Exception(f"Last child (LI) not found inside shadow root: {last_child_selector_in_shadow}")
             logging.info("✅ Found last child element (li:last-child) inside shadow root.")
@@ -96,7 +95,7 @@ class ConfiguratorCompleted:
 
             # Avoid using fixed wait_for_timeout() unless absolutely necessary (e.g., for animations)
             # Prefer waiting for a specific element or network condition to signal readiness.
-            self.page.wait_for_timeout(2000) # Keep this only if you know a specific animation/transition requires it
+            self.page.wait_for_timeout(3000) # Keep this only if you know a specific animation/transition requires it
             logging.info("🏁 Configurator interaction completed.")
 
         except TimeoutError as te:

@@ -12,10 +12,10 @@ from ConfigCompleted import ConfiguratorCompleted  # Playwright version
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 def test_shadow_dom_click():
-    url = "https://www.mercedes-benz.de"
+    url = "https://www.mercedes-benz.ro"
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,
+            headless=True,
             args=[
                 "--start-maximized",
                 "--disable-gpu",
@@ -95,15 +95,12 @@ def test_shadow_dom_click():
         else:
             logging.warning("⚠️ Accept button inside shadow root not found.")
         
-        # Open PI Page
-        page.goto("https://www.mercedes-benz.de/passengercars/models/coupe/cle/overview.html")
-        page.wait_for_load_state("networkidle")
-        logging.info(f"✅ PI Page loaded: {url}")
+    
         
-        """
         # Open PI Page
-        page.goto("https://www.mercedes-benz.de/passengercars/mercedes-benz-cars/car-configurator.html/motorization/CCci/DE/de/CLE-KLASSE/COUPE")
-        page.wait_for_load_state("networkidle")
+
+        page.goto("https://www.mercedes-benz.ro/passengercars/mercedes-benz-cars/car-configurator.html/motorization/CCci/RO/ro/CLE-KLASSE/COUPE?vehicleId=ro_RO__2363521__AU-101_GC-421_LE-L_LU-922_MJ-806_PC-30P-P29-P31-P44-P49-PBG-PDB-PSJ_SA-00U-01U-14U-16U-17U-218-234-235-241-242-243-249-258-260-272-275-287-293-299-310-321-325-33B-345-351-355-365-367-382-464-475-486-500-513-528-537-538-580-587-58U-5B0-608-632-670-679-70B-757-75B-772-79B-824-840-868-873-876-889-88B-891-893-894-897-916-927-94B-968-986-989-B01-B51-B59-H50-L5C-R01-RVA-U02-U10-U22-U23-U25-U26-U29-U34-U60_SC-0K2-0U1-1B3-1U9-2U1-2U8-39V-3S6-4S6-502-51B-6P5-7B4-8B1-8P3-8S1-8S5-8S8-8U8-8X6-998-A00-AA4-B10-K06-K15-K31-PVN-R8K")
+        page.wait_for_timeout(4000)  # Wait for 2 seconds to ensure the page is fully loaded
         logging.info(f"✅ Config Page loaded: {url}")
         
         
@@ -111,8 +108,9 @@ def test_shadow_dom_click():
         configurator = ConfiguratorCompleted(page)
         configurator.perform_configurator_actions()
                
-        """
-
+        
+        """ 
+        
         # Go back to Home Page
         page.goto(url)
         page.wait_for_load_state("networkidle")
@@ -179,6 +177,7 @@ def test_shadow_dom_click():
                 logging.warning(f"❌ No image src contains the expected substring: {expected_src}") 
         
        
+        
 
         # Capture XHR responses
         logging.info("🔍 Capturing XHR responses...")
@@ -200,7 +199,8 @@ def test_shadow_dom_click():
         expected_src = "/content/dam/hq/personalization/campaignmodule/"
         verifier = ImageVerifier(page)
         result = verifier.verify_image("[data-component-name='hp-campaigns'] img", expected_src)
-    
+        
+        """ 
     
         browser.close()
         

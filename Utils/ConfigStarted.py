@@ -33,51 +33,65 @@ class ConfiguratorStarted:
                 return
             logging.info("✅ Shadow DOM expanded.")
 
-            # Access main <ul> inside navigation
+           # Access main <ul> inside navigation
             main_frame = self.page.evaluate_handle(
                 """root => root.querySelector(
-                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > '
-                    + 'div.cc-app-container__navigation.ng-star-inserted > cc-navigation > nav > div > ul'
+                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul'
                 )""",
                 shadow_root
             )
             if not main_frame:
                 logging.error("❌ Main <ul> element not found in shadow DOM.")
                 return
-            self.page.evaluate("el => el.scrollIntoView()", main_frame)
+            self.page.evaluate("el => { if (el) el.scrollIntoView(); }", main_frame)
             logging.info("✅ Scrolled to the main frame (ul element).")
-            self.page.evaluate("el => el.click()", main_frame)
-            logging.info("✅ Clicked on the main frame (ul element).")
+
+            # Instead of clicking the <ul>, click the first <li> or its child <a>/<button>
+            first_li = self.page.evaluate_handle(
+                "ul => ul ? ul.querySelector('li') : null", main_frame
+            )
+            if first_li:
+                self.page.evaluate("el => { if (el) el.scrollIntoView(); }", first_li)
+                clickable = self.page.evaluate_handle(
+                    "li => li ? li.querySelector('a, button') : null", first_li
+                )
+                if clickable:
+                    self.page.evaluate("el => { if (el) el.click(); }", clickable)
+                    logging.info("✅ Clicked on first <li>'s clickable child (a/button).")
+                else:
+                    self.page.evaluate("el => { if (el) el.click(); }", first_li)
+                    logging.info("✅ Clicked on first <li>.")
+            else:
+                logging.warning("⚠️ No <li> found inside main <ul>.")
 
             # Find the second <li> in the nav
             second_child = self.page.evaluate_handle(
                 """root => root.querySelector(
-                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > '
-                    + 'div.cc-app-container__navigation.ng-star-inserted > cc-navigation > nav > div > ul > li:nth-child(2)'
+                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul > li:nth-child(2)'
                 )""",
                 shadow_root
             )
             if not second_child:
                 logging.error("❌ Second <li> element not found in navigation.")
                 return
-            self.page.evaluate("el => el.scrollIntoView()", second_child)
+            self.page.evaluate("el => { if (el) el.scrollIntoView(); }", second_child)
             logging.info("✅ Scrolled to the second child element (li:nth-child(2)).")
-            self.page.evaluate("el => el.focus()", second_child)
+            self.page.evaluate("el => { if (el) el.focus(); }", second_child)
             logging.info("✅ Focused on the second child element.")
 
             # Try to click a child <a> or <button> within the <li>
             try:
                 link_inside = self.page.evaluate_handle(
-                    "el => el.querySelector('a, button')", second_child
+                    "el => el ? el.querySelector('a, button') : null", second_child
                 )
                 if link_inside:
-                    self.page.evaluate("el => el.click()", link_inside)
+                    self.page.evaluate("el => { if (el) el.click(); }", link_inside)
                     logging.info("✅ Clicked on inner clickable element (a/button).")
                 else:
                     raise Exception("No <a> or <button> found inside <li>.")
             except Exception as e:
                 # Fallback: click the <li> itself
-                self.page.evaluate("el => el.click()", second_child)
+                self.page.evaluate("el => { if (el) el.click(); }", second_child)
                 logging.warning(f"⚠️ Fallback click on <li> using JavaScript. Reason: {e}")
 
             self.page.wait_for_timeout(3000)

@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     # Replace with your actual access token and market code
     access_token = "YOUR_ACCESS_TOKEN"
-    market_code = "DE/de"
+    market_code = "BE/nl"  # Replace with the desired market code
     model_code = ""  # Replace with a specific model code if needed, e.g., "X123"
 
     # Initialize VehicleAPI
