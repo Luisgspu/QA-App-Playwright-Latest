@@ -126,8 +126,7 @@ manual_test_cases = [
 
     
 
-        {"test_name": "Last Configuration Completed", "market_code": "CH/de", "model_code": "C174"},
-        {"test_name": "Last Configuration Started", "market_code": "CH/de", "model_code": "C174"},
+        {"test_name": "BFV1", "market_code": "AT/de", "model_code": "C174"},
 
 
 
@@ -216,7 +215,7 @@ def test_run(test_case, screenshot_dir):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=True,  # or False for headed
+            headless=False,  # or False for headed
             args=[
                 "--start-maximized",
                 "--disable-gpu",
