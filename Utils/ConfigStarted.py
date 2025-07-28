@@ -24,8 +24,7 @@ class ConfiguratorStarted:
 
             # Locate shadow host and expand root
             shadow_host_selector = (
-                "body > div.root.responsivegrid.owc-content-container > div > "
-                "div.responsivegrid.ng-content-root.aem-GridColumn.aem-GridColumn--default--12 > div > owcc-car-configurator"
+                "body > div.root.responsivegrid.owc-content-container > div > main > div > owcc-car-configurator"
             )
             shadow_root = self.expand_shadow_element(shadow_host_selector)
             if not shadow_root:
@@ -36,7 +35,7 @@ class ConfiguratorStarted:
            # Access main <ul> inside navigation
             main_frame = self.page.evaluate_handle(
                 """root => root.querySelector(
-                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul'
+                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > nav > ul'
                 )""",
                 shadow_root
             )
@@ -67,7 +66,7 @@ class ConfiguratorStarted:
             # Find the second <li> in the nav
             second_child = self.page.evaluate_handle(
                 """root => root.querySelector(
-                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul > li:nth-child(2)'
+                    '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > nav > ul > li:nth-child(2)'
                 )""",
                 shadow_root
             )

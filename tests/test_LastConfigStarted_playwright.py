@@ -40,7 +40,7 @@ class LCStartedTest:
                 try:
                     configurator.perform_configurator_actions()
                     logging.info("✅ Successfully performed configuration actions.")
-                    self.page.wait_for_timeout(1000)  # Wait for 1 second to ensure actions are completed
+                    self.page.wait_for_timeout(2000)  # Wait for 1 second to ensure actions are completed
                 except Exception as e:
                     logging.error(f"❌ Error performing configuration actions: {e}")
                     allure.attach(f"Error: {e}", name="Configuration Actions Error", attachment_type=allure.attachment_type.TEXT)

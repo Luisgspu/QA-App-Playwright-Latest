@@ -18,9 +18,7 @@ class ConfiguratorCompleted:
 
             # Define the shadow host selector
             shadow_host_selector = (
-                'body > div.root.responsivegrid.owc-content-container > div > '
-                'div.responsivegrid.ng-content-root.aem-GridColumn.aem-GridColumn--default--12 > '
-                'div > owcc-car-configurator'
+                'body > div.root.responsivegrid.owc-content-container > div > main > div > owcc-car-configurator'
             )
 
             # 1. Wait for the shadow host to be visible using a Locator.
@@ -47,7 +45,7 @@ class ConfiguratorCompleted:
             
             # Define the main frame selector *inside* the shadow root
             main_frame_selector_in_shadow = (
-                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul'
+                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > nav > ul'
             )
 
             # 2. Wait for the main_frame element *inside* the shadow root to be visible.
@@ -64,7 +62,7 @@ class ConfiguratorCompleted:
             
             # Find the last <li> in the nav, also *inside* the shadow root
             last_child_selector_in_shadow = (
-                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > div > ul > li:last-child'
+                '#cc-app-container-main > div.cc-app-container__main-frame.cc-grid-container > div.cc-app-container__navigation.ng-star-inserted > cc-navigation > div > nav > ul > li:last-child'
             )
             logging.info(f"🔍 Waiting for last child (LI) inside shadow root: {last_child_selector_in_shadow}")
             last_child_element = shadow_root_element.wait_for_selector(last_child_selector_in_shadow, timeout=15000, state="visible")
