@@ -8,6 +8,7 @@ import pytest
 import allure
 from playwright.sync_api import sync_playwright
 
+
 # Local Module Imports
 from Utils.vehicle_api import VehicleAPI
 from Utils.VerifyPersonalizationAndCapture import verify_personalization_and_capture
@@ -76,6 +77,7 @@ def run_test(page, test_name, market_code, model_code, model_name, body_type, at
         with allure.step(f"🌍 Navigating to HOME_PAGE: {urls['HOME_PAGE']}"):
             page.goto(urls['HOME_PAGE'])
             page.wait_for_load_state("domcontentloaded")
+            page.wait_for_timeout(3000)  # Wait for 2 seconds to ensure the page is fully loaded
             logging.info(f"🌍 Navigated to: {urls['HOME_PAGE']}")
     except Exception as e:
         logging.error(f"❌ Error navigating to HOME_PAGE: {e}")
@@ -126,7 +128,10 @@ manual_test_cases = [
 
     
 
-        {"test_name": "Last Configuration Completed", "market_code": "AT/de", "model_code": "C174"},
+        {"test_name": "Last Configuration Completed", "market_code": "AT/de", "model_code": "X243-fl"},
+                {"test_name": "BFV1", "market_code": "AT/de", "model_code": "X243-fl"},
+
+
 
 
 
@@ -214,8 +219,8 @@ def test_run(test_case, screenshot_dir):
     allure.dynamic.id(uid_hashed)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=False,  # or False for headed
+        browser = p.firefox.launch(
+            headless=True,  # or True for headless mode
             args=[
                 "--start-maximized",
                 "--disable-gpu",
@@ -223,23 +228,24 @@ def test_run(test_case, screenshot_dir):
                 "--incognito",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
-                "--window-size=3000,1688",
-                "--disable-blink-features=AutomationControlled",
                 "--disable-infobars",
                 "--disable-extensions",
-                "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "--disable-features=IsolateOrigins,site-per-process",
-                "--blink-settings=imagesEnabled=true"
+                "--disable-web-security",  # Add this to bypass potential security checks
+                "--allow-running-insecure-content"  # Allow insecure content
             ]
         )
         context = browser.new_context(
             viewport={"width": 3000, "height": 1688},
-            screen={"width": 3000, "height": 1688}
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0"  # Set user-agent here
         )
-        
+                    
         page = context.new_page()
+
+        # Apply stealth mode manually to evade bot detection
         page.add_init_script("""
         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
         """)
     
         # Use the mapping to get the correct substring for filtering
