@@ -14,6 +14,7 @@ class VehicleAPI:
 
     @allure.step("Fetch URLs from API for market code '{market_code}' and model code '{model_code}'")
     def fetch_urls_from_api(self, market_code, model_code=None):
+        logging.info(f"Called fetch_urls_from_api with market_code={market_code}, model_code={model_code}")
         """
         Fetches and processes URLs related to the vehicle model from the API.
         """
@@ -163,7 +164,7 @@ if __name__ == "__main__":
 
     # Replace with your actual access token and market code
     access_token = "YOUR_ACCESS_TOKEN"
-    market_code = "BE/nl"  # Replace with the desired market code
+    market_code = "AT/de"  # Replace with the desired market code
     model_code = ""  # Replace with a specific model code if needed, e.g., "X123"
 
     # Initialize VehicleAPI
